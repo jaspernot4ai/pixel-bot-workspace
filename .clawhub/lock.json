@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "skill-scanner": {
+      "version": "0.1.2",
+      "installedAt": 1774095976874
+    },
+    "summarize": {
+      "version": "1.0.0",
+      "installedAt": 1774096804102
+    },
+    "blogwatcher": {
+      "version": "1.0.0",
+      "installedAt": 1774096807422
+    },
+    "weather": {
+      "version": "1.0.0",
+      "installedAt": 1774096810236
+    },
+    "gog": {
+      "version": "1.0.0",
+      "installedAt": 1774097003569
+    },
+    "himalaya": {
+      "version": "1.0.0",
+      "installedAt": 1774111445701
+    }
+  }
+}
