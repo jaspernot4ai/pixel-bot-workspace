@@ -53,13 +53,14 @@
 
 ### 目前進度
 - [x] 建立專案結構 (pixel-art-map/)
-- [x] types.ts — 共用型別定義
+- [x] types.ts — 共用型別定義（已同步 API v1）
 - [x] map.ts — 地圖區域渲染
-- [x] main.ts — Canvas 初始化 + 範例 Bot 渲染
-- [ ] API 整合
-- [ ] WebSocket 即時更新
+- [x] api.ts — REST API 服務層
+- [x] ws.ts — WebSocket 客戶端
+- [x] main.ts — Canvas 初始化 + API 對接 + WS 事件處理
 - [ ] Bot 狀態圖示動畫
 - [ ] 訊息泡泡動畫
+- [ ] PATCH API 控制端點對接
 
 ### 討論串位置
 https://discord.com/channels/1484773968882962553/1484894485736456233/1484966224315023511

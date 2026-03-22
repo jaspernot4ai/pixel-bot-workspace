@@ -1,5 +1,5 @@
 // Shared type definitions for pixel-art-map
-// These should stay in sync with Backend's shared/ types
+// Synced with Backend API v1
 
 export type BotStatus = 'idle' | 'working' | 'broadcasting';
 
@@ -10,36 +10,56 @@ export interface Position {
 
 export interface Bot {
   id: string;
-  name: string;
+  numericId: string;
   status: BotStatus;
   position: Position;
-  task?: string;
+  currentTask: string | null;
+  currentMessage: string | null;
+  lastActive: number;
+  uptime: number;
 }
 
-export interface Tile {
-  type: TileType;
-  zone: MapZone;
+export interface BotsResponse {
+  bots: Bot[];
+  count: number;
 }
 
-export type TileType = 'empty' | 'bot-station' | 'task-area' | 'comms' | 'monitoring' | 'idle';
+export interface BotResponse extends Bot {}
 
-export type MapZone = 
-  | 'bot-stations'   // y 0-4
-  | 'task-execution' // y 5-10
-  | 'comms'          // y 8-10 (overlap)
-  | 'monitoring'     // y 11-13
-  | 'idle';          // y 14-15
+// Map API types
+export interface MapZones {
+  botArea: { yStart: number; yEnd: number };
+  generalTask: { yStart: number; yEnd: number };
+  communicationTask: { yStart: number; yEnd: number };
+  monitoringTask: { yStart: number; yEnd: number };
+  decoration: { yStart: number; yEnd: number };
+}
 
 export interface MapConfig {
-  width: number;    // 16 tiles
-  height: number;   // 16 tiles
-  tileSize: number; // 32 pixels
+  width: number;
+  height: number;
+  tileSize: number;
+  origin: string;
+  zones: MapZones;
 }
 
-export const MAP_CONFIG: MapConfig = {
+export interface MapDerived {
+  tileSize: number;
+  pixelWidth: number;
+  pixelHeight: number;
+  totalTiles: number;
+}
+
+export interface MapResponse {
+  config: MapConfig;
+  derived: MapDerived;
+}
+
+export const MAP_CONFIG = {
   width: 16,
   height: 16,
   tileSize: 32,
+  origin: 'topLeft' as const,
 };
 
 // WebSocket event types
@@ -51,11 +71,23 @@ export type BotEventType =
   | 'bot.heartbeat'
   | 'bot.error'
   | 'bot.joined'
-  | 'bot.left';
+  | 'bot.left'
+  | 'connected';
 
-export interface BotEvent {
+export interface WsMessage {
   type: BotEventType;
-  botId: string;
+  botId?: string;
   timestamp: number;
   data?: Record<string, unknown>;
+}
+
+export interface WsConnectedData {
+  message: string;
+}
+
+// Status update payload
+export interface StatusUpdatePayload {
+  status?: BotStatus;
+  task?: string;
+  position?: Position;
 }
