@@ -91,3 +91,7 @@ export interface StatusUpdatePayload {
   task?: string;
   position?: Position;
 }
+
+// Map zone types
+export type MapZone = 'bot-stations' | 'task-execution' | 'comms' | 'monitoring' | 'idle';
+export type TileType = 'bot-station' | 'comms' | 'monitoring' | 'idle' | 'empty';

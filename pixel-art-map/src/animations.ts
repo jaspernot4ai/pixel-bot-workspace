@@ -29,12 +29,12 @@ export class AnimationController {
   private easingFn: EasingFunction;
   private onUpdate: () => void;
 
-  constructor(duration: number, easingFn: EasingFunction = easing.easeOut, onUpdate: () => void) {
+  constructor(_duration: number, easingFn: EasingFunction = easing.easeOut, onUpdate: () => void) {
     this.easingFn = easingFn;
     this.onUpdate = onUpdate;
   }
 
-  start(id: string, from: Partial<AnimationFrame>, to: Partial<AnimationFrame>, duration: number) {
+  start(id: string, from: Partial<AnimationFrame>, _to: Partial<AnimationFrame>, duration: number) {
     this.animations.set(id, { x: 0, y: 0, scale: 1, opacity: 1, ...from });
     this.startTimes.set(id, performance.now());
     this.durations.set(id, duration);
@@ -44,7 +44,8 @@ export class AnimationController {
     const now = performance.now();
     const startTime = this.startTimes.get(id) ?? now;
     const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
+    const dur = this.durations.get(id) ?? duration;
+    const progress = Math.min(elapsed / dur, 1);
     const eased = this.easingFn(progress);
 
     const current = this.animations.get(id);
@@ -59,7 +60,7 @@ export class AnimationController {
     this.onUpdate();
 
     if (progress < 1) {
-      requestAnimationFrame(() => this.update(id, to, duration));
+      requestAnimationFrame(() => this.update(id, to, dur));
     } else {
       this.animations.delete(id);
     }
@@ -86,13 +87,9 @@ export interface BubbleData {
 
 export class BubbleAnimator {
   private bubbles: Map<string, BubbleData & { opacity: number; scale: number }> = new Map();
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
   private render: () => void;
 
-  constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, render: () => void) {
-    this.canvas = canvas;
-    this.ctx = ctx;
+  constructor(_canvas: HTMLCanvasElement, _ctx: CanvasRenderingContext2D, render: () => void) {
     this.render = render;
   }
 
