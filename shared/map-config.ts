@@ -21,11 +21,11 @@ export const MAP_CONFIG: MapConfig = {
   tileSize: 32,
   origin: 'topLeft',
   zones: {
-    botArea: { yStart: 0, yEnd: 4 },       // Bot 工位區
-    generalTask: { yStart: 5, yEnd: 6 },   // 一般任務區（heartbeat、cron）
-    communicationTask: { yStart: 7, yEnd: 8 }, // 通訊任務區（broadcast、訊息回覆）
-    monitoringTask: { yStart: 9, yEnd: 10 },   // 監控任務區（health check、alert）
-    decoration: { yStart: 11, yEnd: 15 },   // 裝飾/緩衝區
+    botArea: { yStart: 0, yEnd: 4 },           // Bot 工位區
+    generalTask: { yStart: 5, yEnd: 7 },       // 一般任務區（heartbeat、cron）
+    communicationTask: { yStart: 8, yEnd: 10 }, // 通訊區（broadcast、訊息回覆）
+    monitoringTask: { yStart: 11, yEnd: 13 },  // 監控區（health check、alert）
+    decoration: { yStart: 14, yEnd: 15 },        // 緩衝/裝飾區
   },
 };
 
