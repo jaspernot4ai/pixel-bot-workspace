@@ -58,9 +58,11 @@
 - [x] api.ts — REST API 服務層
 - [x] ws.ts — WebSocket 客戶端
 - [x] main.ts — Canvas 初始化 + API 對接 + WS 事件處理
-- [ ] Bot 狀態圖示動畫
-- [ ] 訊息泡泡動畫
-- [ ] PATCH API 控制端點對接
+- [x] animations.ts — 動畫工具（BubbleAnimator）
+- [x] Bot 狀態圖示動畫（pulse 效果）
+- [x] 訊息泡泡動畫
+- [ ] Demo mode 腳本化
+- [ ] 響應式設計優化
 
 ### 討論串位置
 https://discord.com/channels/1484773968882962553/1484894485736456233/1484966224315023511

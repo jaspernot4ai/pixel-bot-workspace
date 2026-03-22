@@ -1,6 +1,7 @@
 import { renderMap } from './map';
 import { fetchBots, fetchMap } from './api';
 import { botWs } from './ws';
+import { BubbleAnimator } from './animations';
 import { MAP_CONFIG, Bot } from './types';
 
 const canvas = document.getElementById('map') as HTMLCanvasElement;
@@ -13,8 +14,9 @@ canvas.height = MAP_CONFIG.height * MAP_CONFIG.tileSize;
 
 // State
 let bots: Bot[] = [];
+const bubbleAnimator = new BubbleAnimator(canvas, ctx, renderBots);
 
-// Render bots on the map
+// Render function
 function renderBots() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   renderMap(ctx);
@@ -22,6 +24,9 @@ function renderBots() {
   for (const bot of bots) {
     renderBot(ctx, bot);
   }
+
+  // Draw message bubbles on top
+  bubbleAnimator.draw(ctx);
 }
 
 function renderBot(ctx: CanvasRenderingContext2D, bot: Bot) {
@@ -34,10 +39,12 @@ function renderBot(ctx: CanvasRenderingContext2D, bot: Bot) {
     broadcasting: '#ef4444', // red
   };
 
-  // Draw status circle
+  // Draw status circle with animation (pulse for working)
+  const radius = bot.status === 'working' ? 8 + Math.sin(Date.now() / 200) * 2 : 8;
+
   ctx.fillStyle = colors[bot.status] || colors.idle;
   ctx.beginPath();
-  ctx.arc(x, y, 8, 0, Math.PI * 2);
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.fill();
 
   // Pixel border
@@ -50,23 +57,54 @@ function renderBot(ctx: CanvasRenderingContext2D, bot: Bot) {
   ctx.font = '8px monospace';
   ctx.textAlign = 'center';
   ctx.fillText(bot.id, x, y + 18, MAP_CONFIG.tileSize - 4);
+
+  // Draw current task if any
+  if (bot.currentTask) {
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '6px monospace';
+    ctx.fillText(bot.currentTask.substring(0, 8), x, y + 28, MAP_CONFIG.tileSize - 4);
+  }
 }
 
 // Event handlers
-function handleBotStatusChanged(botId: string, newStatus: string) {
+function handleBotStatusChanged(botId: string, newStatus: string, data?: Record<string, unknown>) {
   const bot = bots.find((b) => b.id === botId);
   if (bot) {
     bot.status = newStatus as Bot['status'];
+    if (data?.task) bot.currentTask = data.task as string;
     renderBots();
   }
 }
 
-function handleBotMessageSent(botId: string, message: string) {
+function handleBotMessageSent(botId: string, message: string, timestamp: number) {
   const bot = bots.find((b) => b.id === botId);
   if (bot) {
     bot.currentMessage = message;
+
+    // Show bubble animation
+    const x = bot.position.x * MAP_CONFIG.tileSize + MAP_CONFIG.tileSize / 2;
+    const y = bot.position.y * MAP_CONFIG.tileSize + MAP_CONFIG.tileSize / 2;
+    bubbleAnimator.show({ id: `${botId}-${timestamp}`, botId, message, x, y, timestamp });
+
     renderBots();
-    // TODO: Show message bubble animation
+  }
+}
+
+function handleTaskStarted(botId: string, task: string) {
+  const bot = bots.find((b) => b.id === botId);
+  if (bot) {
+    bot.currentTask = task;
+    bot.status = 'working';
+    renderBots();
+  }
+}
+
+function handleTaskCompleted(botId: string) {
+  const bot = bots.find((b) => b.id === botId);
+  if (bot) {
+    bot.currentTask = null;
+    bot.status = 'idle';
+    renderBots();
   }
 }
 
@@ -109,23 +147,31 @@ async function init() {
 
   // Set up WebSocket handlers
   botWs.on('bot.status.changed', (msg) => {
-    if (msg.data?.status) {
-      handleBotStatusChanged(msg.botId!, msg.data.status as string);
-    }
+    handleBotStatusChanged(msg.botId!, msg.data?.status as string, msg.data);
   });
 
   botWs.on('bot.message.sent', (msg) => {
-    if (msg.data?.message) {
-      handleBotMessageSent(msg.botId!, msg.data.message as string);
-    }
+    handleBotMessageSent(
+      msg.botId!,
+      msg.data?.message as string,
+      msg.timestamp
+    );
   });
 
   botWs.on('bot.task.started', (msg) => {
-    console.log('[WS] Task started:', msg.botId, msg.data?.task);
+    handleTaskStarted(msg.botId!, msg.data?.task as string);
   });
 
   botWs.on('bot.task.completed', (msg) => {
-    console.log('[WS] Task completed:', msg.botId);
+    handleTaskCompleted(msg.botId!);
+  });
+
+  botWs.on('bot.error', (msg) => {
+    const bot = bots.find((b) => b.id === msg.botId);
+    if (bot) {
+      bot.status = 'broadcasting'; // Error = red
+      renderBots();
+    }
   });
 
   // Try to connect (will fail gracefully if server not running)
@@ -133,14 +179,26 @@ async function init() {
     console.warn('[WS] WebSocket connection failed, running in demo mode');
   });
 
-  // Demo: toggle status every 3 seconds
+  // Demo mode: simulate status changes
   setInterval(() => {
     if (bots.length > 0) {
       const bot = bots[0];
-      bot.status = bot.status === 'idle' ? 'working' : 'idle';
+      const statuses: Bot['status'][] = ['idle', 'working', 'broadcasting'];
+      const currentIndex = statuses.indexOf(bot.status);
+      bot.status = statuses[(currentIndex + 1) % statuses.length];
       renderBots();
     }
   }, 3000);
+
+  // Demo: simulate message every 8 seconds
+  setInterval(() => {
+    if (bots.length > 0) {
+      const bot = bots[0];
+      const messages = ['Hello!', 'Working...', 'Done!', 'Error?', 'OK'];
+      const msg = messages[Math.floor(Math.random() * messages.length)];
+      handleBotMessageSent(bot.id, msg, Date.now());
+    }
+  }, 8000);
 }
 
 init();
