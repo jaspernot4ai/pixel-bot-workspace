@@ -1,5 +1,17 @@
 // Bot state management service
-import { BotState, BotStatus, TaskType, BOT_CONFIGS } from '../types/index.js';
+
+import type { BotState, BotStatus, TaskType } from '../types/index.js';
+
+// Bot config - duplicated from shared until ESM issue is resolved
+const BOT_CONFIGS = [
+  { id: 'Frontend', numericId: '1484830086350897152', initialPosition: { x: 0, y: 0 } },
+  { id: 'Backend', numericId: '1484830707124535396', initialPosition: { x: 1, y: 0 } },
+  { id: 'Data', numericId: '1484929073892429945', initialPosition: { x: 2, y: 0 } },
+  { id: 'Devops', numericId: '1484929943417655296', initialPosition: { x: 3, y: 0 } },
+  { id: 'QA', numericId: '1484930371307966535', initialPosition: { x: 4, y: 0 } },
+  { id: 'AI Engineer', numericId: '1484930784463949844', initialPosition: { x: 5, y: 0 } },
+  { id: 'SecOps', numericId: '1484931134713364480', initialPosition: { x: 6, y: 0 } },
+];
 
 // In-memory bot states
 const botStates: Map<string, BotState> = new Map();

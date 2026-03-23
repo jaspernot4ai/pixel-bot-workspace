@@ -1,6 +1,23 @@
 // Map API routes
 import { Router } from 'express';
-import { MAP_CONFIG, TILE_SIZE, MAP_PIXEL_WIDTH, MAP_PIXEL_HEIGHT } from '../types/index.js';
+
+// Map config - duplicated from shared until ESM issue is resolved
+const MAP_CONFIG = {
+  width: 16,
+  height: 16,
+  tileSize: 32,
+  origin: 'topLeft',
+  zones: {
+    botArea: { yStart: 0, yEnd: 4 },
+    generalTask: { yStart: 5, yEnd: 7 },
+    communicationTask: { yStart: 8, yEnd: 10 },
+    monitoringTask: { yStart: 11, yEnd: 13 },
+    decoration: { yStart: 14, yEnd: 15 },
+  },
+};
+const TILE_SIZE = 32;
+const MAP_PIXEL_WIDTH = 512;
+const MAP_PIXEL_HEIGHT = 512;
 
 const router = Router();
 
