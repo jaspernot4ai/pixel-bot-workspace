@@ -1,7 +1,7 @@
 // Shared type definitions for pixel-art-map
 // Synced with Backend API v1
 
-export type BotStatus = 'idle' | 'working' | 'broadcasting';
+export type BotStatus = 'idle' | 'working' | 'broadcasting' | 'error';
 
 export interface Position {
   x: number;

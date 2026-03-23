@@ -37,6 +37,7 @@ function renderBot(ctx: CanvasRenderingContext2D, bot: Bot) {
     idle: '#22c55e',        // green
     working: '#3b82f6',     // blue
     broadcasting: '#ef4444', // red
+    error: '#ff0000',       // bright red for error (flashing handled separately)
   };
 
   // Draw status circle with animation (pulse for working)
