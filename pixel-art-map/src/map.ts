@@ -1,4 +1,5 @@
-import { MAP_CONFIG, MapZone, TileType } from './types';
+import { MAP_CONFIG } from './types';
+import type { MapZone, TileType } from './types';
 
 const ZONE_COLORS: Record<MapZone, string> = {
   'bot-stations': '#374151',    // dark gray
@@ -50,7 +51,6 @@ function getTileType(tileX: number, tileY: number): TileType {
 }
 
 export function renderMap(ctx: CanvasRenderingContext2D): void {
-  const { MAP_CONFIG } = require('./types');
   
   // Draw background
   ctx.fillStyle = '#0f0f0f';
