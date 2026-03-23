@@ -1,7 +1,7 @@
 // API service for pixel-art-map
 import type { BotsResponse, MapResponse, Bot, StatusUpdatePayload } from './types';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = '/api';
 
 export async function fetchBots(): Promise<BotsResponse> {
   const res = await fetch(`${API_BASE}/bots`);

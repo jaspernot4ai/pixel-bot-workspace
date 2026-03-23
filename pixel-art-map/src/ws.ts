@@ -3,7 +3,7 @@ import type { WsMessage, BotEventType } from './types';
 
 type MessageHandler = (msg: WsMessage) => void;
 
-const WS_URL = 'ws://localhost:3001/ws/bots';
+const WS_URL = `/ws/bots`;
 
 export class BotWebSocket {
   private ws: WebSocket | null = null;
