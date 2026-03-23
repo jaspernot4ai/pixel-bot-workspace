@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 寶可夢像素辦公室 - 等距像素風格</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; image-rendering: pixelated; }
+
+        body {
+            background: linear-gradient(to bottom, #5ba8d6 0%, #7ec8e3 50%, #a8e6cf 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+        }
+
+        h1 {
+            color: #ffd93d;
+            font-size: 28px;
+            text-shadow: 3px 3px 0 #b8860b, -1px -1px 0 #fff5, 0 0 20px rgba(255,215,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #2d4a6a;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .scene-container {
+            position: relative;
+            width: 1100px;
+            height: 650px;
+            overflow: hidden;
+            background: #c8e6c9;
+            border: 5px solid #5a4a3a;
+            border-radius: 10px;
+            box-shadow: 0 0 0 3px #8b7355, 0 0 30px rgba(0,0,0,0.3);
+        }
+
+        /* 牆壁 */
+        .wall-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 250px;
+            background: linear-gradient(to bottom, #f5efe6, #e8e0d5);
+            overflow: hidden;
+        }
+
+        .wall-tiles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(90deg, transparent 0px, transparent 98px, #d0c4b0 98px, #d0c4b0 100px),
+                repeating-linear-gradient(0deg, transparent 0px, transparent 48px, #d0c4b0 48px, #d0c4b0 50px);
+        }
+
+        .wall-trim {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: linear-gradient(to bottom, #8b7355, #6b5344);
+        }
+
+        /* 窗戶 */
+        .wall-window {
+            position: absolute;
+            width: 100px;
+            height: 90px;
+            background: linear-gradient(to bottom, #87CEEB, #b4e7f8);
+            border: 8px solid #8b7355;
+        }
+
+        .wall-window::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 6px;
+            height: 100%;
+            background: #8b7355;
+            transform: translateX(-50%);
+        }
+
+        .wall-window::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: #8b7355;
+            transform: translateY(-50%);
+        }
+
+        .window-1 { top: 30px; left: 50px; }
+        .window-2 { top: 30px; left: 200px; }
+        .window-3 { top: 30px; right: 200px; }
+        .window-4 { top: 30px; right: 50px; }
+
+        /* 掛飾 */
+        .wall-clock {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border: 5px solid #8b7355;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        .poster {
+            position: absolute;
+            width: 45px;
+            height: 60px;
+            background: #fff;
+            border: 4px solid #8b7355;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .poster-1 { top: 25px; left: 400px; background: linear-gradient(to bottom, #ff6b6b, #ee5a5a); }
+        .poster-2 { top: 25px; left: 470px; background: linear-gradient(to bottom, #4ecdc4, #3dbdb5); }
+        .poster-3 { top: 25px; left: 540px; background: linear-gradient(to bottom, #ffeaa7, #fdcb6e); }
+
+        /* 地板 */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 400px;
+            background: 
+                repeating-linear-gradient(45deg, #d4c4a8 0px, #d4c4a8 30px, #c8b898 30px, #c8b898 60px);
+            transform: perspective(600px) rotateX(55deg);
+            transform-origin: bottom;
+        }
+
+        /* 辦公桌 */
+        .desk {
+            position: absolute;
+            width: 130px;
+            height: 80px;
+        }
+
+        .desk-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 110px;
+            height: 55px;
+            background: linear-gradient(135deg, #deb887 0%, #d4a574 50%, #c49464 100%);
+            border: 3px solid #8b7355;
+            transform: rotateX(60deg) rotateZ(-45deg);
+            transform-origin: top left;
+        }
+
+        .desk-front {
+            position: absolute;
+            top: 32px;
+            left: 0;
+            width: 110px;
+            height: 45px;
+            background: linear-gradient(to right, #c49464, #b8956a);
+            border: 3px solid #8b7355;
+            border-top: none;
+            transform: perspective(200px) rotateX(-30deg);
+        }
+
+        .monitor {
+            position: absolute;
+            bottom: 55px;
+            left: 20px;
+            width: 40px;
+            height: 32px;
+            background: #2d2d44;
+            border: 3px solid #1a1a2e;
+            border-radius: 3px;
+            transform: rotateX(60deg) rotateZ(-45deg);
+            transform-origin: top left;
+        }
+
+        .monitor-screen {
+            width: 100%;
+            height: 100%;
+            background: #1a3a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5px;
+            color: #00ff00;
+            animation: screenGlow 1s infinite;
+        }
+
+        @keyframes screenGlow {
+            0%, 100% { box-shadow: inset 0 0 5px rgba(0,255,0,0.3); }
+            50% { box-shadow: inset 0 0 10px rgba(0,255,0,0.5); }
+        }
+
+        .keyboard {
+            position: absolute;
+            bottom: 30px;
+            left: 28px;
+            width: 32px;
+            height: 10px;
+            background: linear-gradient(to bottom, #4a4a6a, #3d3d5c);
+            border: 2px solid #2d2d44;
+            border-radius: 2px;
+            transform: rotateX(60deg) rotateZ(-45deg);
+        }
+
+        .coffee {
+            position: absolute;
+            bottom: 45px;
+            right: 20px;
+            width: 10px;
+            height: 9px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            transform: rotateX(60deg) rotateZ(-45deg);
+        }
+
+        .coffee::after {
+            content: '~';
+            position: absolute;
+            bottom: 100%;
+            left: 1px;
+            font-size: 6px;
+            animation: steamRise 0.8s infinite;
+        }
+
+        @keyframes steamRise {
+            0%, 100% { transform: translateY(0); opacity: 0.8; }
+            50% { transform: translateY(-2px); opacity: 0.4; }
+        }
+
+        /* 檔案櫃 */
+        .cabinet {
+            position: absolute;
+            width: 55px;
+            height: 85px;
+            background: linear-gradient(to right, #8a9a9a, #7a8a8a);
+            border: 3px solid #5a6a6a;
+        }
+
+        .cabinet-drawer {
+            height: 24px;
+            border-bottom: 2px solid #5a6a6a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cabinet-handle {
+            width: 15px;
+            height: 4px;
+            background: #4a5a5a;
+            border-radius: 2px;
+        }
+
+        /* 書架 */
+        .bookshelf {
+            position: absolute;
+            width: 75px;
+            height: 100px;
+            background: linear-gradient(to right, #8b7355, #7a6344);
+            border: 3px solid #5a4a3a;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 5px;
+        }
+
+        .shelf-books {
+            display: flex;
+            gap: 2px;
+            align-items: flex-end;
+        }
+
+        .book {
+            width: 7px;
+            border-radius: 1px;
+        }
+
+        .shelf-potions {
+            display: flex;
+            gap: 3px;
+            justify-content: center;
+        }
+
+        .potion {
+            width: 8px;
+            height: 12px;
+            border-radius: 2px 2px 4px 4px;
+        }
+
+        .potion::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 3px;
+            background: #8b7355;
+            margin: 0 auto;
+            border-radius: 1px;
+        }
+
+        /* 盆栽 */
+        .plant {
+            position: absolute;
+        }
+
+        .plant-pot {
+            width: 22px;
+            height: 18px;
+            background: linear-gradient(to right, #d35400, #a04000);
+            border: 2px solid #8b4513;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .plant-leaves {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            animation: leavesSway 2s ease-in-out infinite;
+        }
+
+        @keyframes leavesSway {
+            0%, 100% { transform: translateX(-50%) rotate(-5deg); }
+            50% { transform: translateX(-50%) rotate(5deg); }
+        }
+
+        /* 飲水機 */
+        .water-cooler {
+            position: absolute;
+            width: 35px;
+            height: 85px;
+        }
+
+        .cooler-body {
+            width: 100%;
+            height: 65px;
+            background: linear-gradient(to right, #e8e8e8, #d0d0d0);
+            border: 3px solid #b0b0b0;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .cooler-bottle {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 18px;
+            background: linear-gradient(to bottom, #5dade2, #3498db);
+            border: 2px solid #2980b9;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .cooler-btn {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: #e74c3c;
+            border-radius: 50%;
+            border: 2px solid #c0392b;
+        }
+
+        .water-drip {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            width: 3px;
+            height: 3px;
+            background: #85c1e9;
+            border-radius: 50%;
+            animation: dripDrop 1.5s infinite;
+        }
+
+        @keyframes dripDrop {
+            0% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, 30px); opacity: 0; }
+        }
+
+        /* 沙發 */
+        .sofa {
+            position: absolute;
+            width: 120px;
+            height: 50px;
+        }
+
+        .sofa-back {
+            width: 100%;
+            height: 25px;
+            background: linear-gradient(to bottom, #9b59b6, #8e44ad);
+            border-radius: 10px 10px 0 0;
+            border: 3px solid #7d3c98;
+        }
+
+        .sofa-seat {
+            width: 100%;
+            height: 22px;
+            background: linear-gradient(to bottom, #8e44ad, #7d3c98);
+            border-radius: 0 0 5px 5px;
+        }
+
+        /* 寶可夢角色 */
+        .pokemon {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: charBounce 0.8s ease-in-out infinite;
+            z-index: 20;
+        }
+
+        @keyframes charBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .pokemon-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            border: 4px solid #333;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .pokemon-avatar::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 50%;
+        }
+
+        .pokemon-shadow {
+            width: 30px;
+            height: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            margin-top: -3px;
+        }
+
+        .pokemon-label {
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            margin-bottom: 3px;
+            border: 2px solid #ffd93d;
+        }
+
+        .pokemon-name {
+            font-size: 11px;
+            margin-top: 2px;
+        }
+
+        /* 皮卡丘 */
+        .pikachu-avatar { background: linear-gradient(to bottom, #ffd93d, #f4d03f); }
+        
+        /* 噴火龍 */
+        .charizard-avatar { background: linear-gradient(to bottom, #ff6b35, #e74c3c); }
+        
+        /* 妙蛙種子 */
+        .bulbasaur-avatar { background: linear-gradient(to bottom, #27ae60, #1e8449); }
+        
+        /* 傑尼龜 */
+        .squirtle-avatar { background: linear-gradient(to bottom, #5dade2, #3498db); }
+        
+        /* 伊布 */
+        .eevee-avatar { background: linear-gradient(to bottom, #d4a574, #c49464); }
+        
+        /* 喵喵 */
+        .meowth-avatar { background: linear-gradient(to bottom, #f9e79f, #f4d03f); }
+        
+        /* 耿鬼 */
+        .gengar-avatar { background: linear-gradient(to bottom, #9b59b6, #8e44ad); }
+        
+        /* 小火龍 */
+        .charmander-avatar { background: linear-gradient(to bottom, #ff9f43, #ee5a24); }
+
+        /* 標籤樣式 */
+        .label-work { border-color: #2ecc71 !important; }
+        .label-busy { border-color: #e74c3c !important; }
+        .label-break { border-color: #f39c12 !important; }
+
+        /* 桌子位置 */
+        .desk-1 { bottom: 180px; left: 80px; }
+        .desk-2 { bottom: 280px; left: 280px; }
+        .desk-3 { bottom: 160px; left: 480px; }
+        .desk-4 { bottom: 300px; right: 280px; }
+        .desk-5 { bottom: 200px; right: 80px; }
+
+        /* 角色位置 */
+        .pikachu-pos { bottom: 260px; left: 110px; }
+        .charizard-pos { bottom: 360px; left: 310px; }
+        .bulbasaur-pos { bottom: 240px; left: 510px; }
+        .squirtle-pos { bottom: 380px; right: 310px; }
+        .eevee-pos { bottom: 280px; right: 110px; }
+        .gengar-pos { bottom: 330px; left: 200px; }
+        .meowth-pos { bottom: 540px; left: 60px; }
+        .charmander-pos { bottom: 450px; right: 150px; }
+
+        /* 家具位置 */
+        .cabinet-1 { bottom: 40px; left: 20px; }
+        .cabinet-2 { bottom: 40px; right: 20px; }
+        .bookshelf-1 { bottom: 40px; left: 120px; }
+        .bookshelf-2 { bottom: 40px; right: 120px; }
+        .plant-1 { bottom: 40px; left: 250px; }
+        .plant-2 { bottom: 40px; right: 250px; }
+        .cooler-1 { bottom: 420px; right: 60px; }
+        .sofa-1 { bottom: 460px; left: 40px; }
+
+        /* 底部狀態列 */
+        .status-bar {
+            width: 1100px;
+            margin-top: 15px;
+            background: linear-gradient(to bottom, #3d3d5c, #2d2d44);
+            border: 4px solid #4a3728;
+            border-radius: 8px;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: inset 3px 3px 0 #5a5a7a, inset -3px -3px 0 #1a1a2e;
+        }
+
+        .team-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .member {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 2px solid;
+        }
+
+        .member-icon { font-size: 16px; }
+        .member-text { font-size: 10px; color: #fff; }
+        .member-role { font-size: 8px; color: #95a5a6; }
+
+        .time-box { text-align: center; }
+        .time-val { font-size: 22px; color: #ffd93d; text-shadow: 2px 2px 0 #000; }
+        .time-lbl { font-size: 9px; color: #95a5a6; }
+    </style>
+</head>
+<body>
+    <h1>🎮 寶可夢像素辦公室 🏢</h1>
+    <p class="subtitle">等距視角 | 16-BIT 復古美學 | 快樂上班中！</p>
+
+    <div class="scene-container">
+        <!-- 牆壁背景 -->
+        <div class="wall-back">
+            <div class="wall-tiles"></div>
+            <div class="wall-trim"></div>
+            <div class="wall-window window-1"></div>
+            <div class="wall-window window-2"></div>
+            <div class="wall-window window-3"></div>
+            <div class="wall-window window-4"></div>
+            <div class="wall-clock">🕐</div>
+            <div class="poster poster-1">⭐</div>
+            <div class="poster poster-2">🎮</div>
+            <div class="poster poster-3">❤️</div>
+        </div>
+
+        <!-- 地板 -->
+        <div class="floor"></div>
+
+        <!-- 辦公桌 -->
+        <div class="desk desk-1">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="monitor"><div class="monitor-screen">CODE~</div></div>
+            <div class="keyboard"></div>
+            <div class="coffee"></div>
+        </div>
+
+        <div class="desk desk-2">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="monitor"><div class="monitor-screen">CALL...</div></div>
+            <div class="keyboard"></div>
+            <div class="coffee"></div>
+        </div>
+
+        <div class="desk desk-3">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="monitor"><div class="monitor-screen">AI_</div></div>
+            <div class="keyboard"></div>
+            <div class="coffee"></div>
+        </div>
+
+        <div class="desk desk-4">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="monitor"><div class="monitor-screen">DATA</div></div>
+            <div class="keyboard"></div>
+            <div class="coffee"></div>
+        </div>
+
+        <div class="desk desk-5">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="monitor"><div class="monitor-screen">TEST</div></div>
+            <div class="keyboard"></div>
+            <div class="coffee"></div>
+        </div>
+
+        <!-- 檔案櫃 -->
+        <div class="cabinet cabinet-1">
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+        </div>
+
+        <div class="cabinet cabinet-2">
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+        </div>
+
+        <!-- 書架 -->
+        <div class="bookshelf bookshelf-1">
+            <div class="shelf-books">
+                <div class="book" style="height:16px; background:#e74c3c;"></div>
+                <div class="book" style="height:14px; background:#3498db;"></div>
+                <div class="book" style="height:18px; background:#2ecc71;"></div>
+                <div class="book" style="height:13px; background:#f39c12;"></div>
+                <div class="book" style="height:15px; background:#9b59b6;"></div>
+            </div>
+            <div class="shelf-potions">
+                <div class="potion" style="background:linear-gradient(to bottom,#ff6b6b,#e74c3c);"></div>
+                <div class="potion" style="background:linear-gradient(to bottom,#74b9ff,#3498db);"></div>
+                <div class="potion" style="background:linear-gradient(to bottom,#55efc4,#00b894);"></div>
+            </div>
+            <div class="shelf-books">
+                <div class="book" style="height:15px; background:#1abc9c;"></div>
+                <div class="book" style="height:17px; background:#e74c3c;"></div>
+                <div class="book" style="height:12px; background:#3498db;"></div>
+            </div>
+        </div>
+
+        <div class="bookshelf bookshelf-2">
+            <div class="shelf-books">
+                <div class="book" style="height:17px; background:#f39c12;"></div>
+                <div class="book" style="height:14px; background:#9b59b6;"></div>
+                <div class="book" style="height:16px; background:#1abc9c;"></div>
+                <div class="book" style="height:13px; background:#e74c3c;"></div>
+            </div>
+            <div class="shelf-potions">
+                <div class="potion" style="background:linear-gradient(to bottom,#ff9f43,#ee5a24);"></div>
+                <div class="potion" style="background:linear-gradient(to bottom,#fd79a8,#e84393);"></div>
+            </div>
+            <div class="shelf-books">
+                <div class="book" style="height:18px; background:#2ecc71;"></div>
+                <div class="book" style="height:14px; background:#3498db;"></div>
+                <div class="book" style="height:16px; background:#f39c12;"></div>
+            </div>
+        </div>
+
+        <!-- 盆栽 -->
+        <div class="plant plant-1">
+            <div class="plant-leaves">🌿</div>
+            <div class="plant-pot"></div>
+        </div>
+
+        <div class="plant plant-2">
+            <div class="plant-leaves">🌱</div>
+            <div class="plant-pot"></div>
+        </div>
+
+        <!-- 飲水機 -->
+        <div class="water-cooler cooler-1">
+            <div class="cooler-bottle"></div>
+            <div class="cooler-body">
+                <div class="cooler-btn"></div>
+                <div class="water-drip"></div>
+            </div>
+        </div>
+
+        <!-- 沙發 -->
+        <div class="sofa sofa-1">
+            <div class="sofa-back"></div>
+            <div class="sofa-seat"></div>
+        </div>
+
+        <!-- 寶可夢角色 -->
+        <div class="pokemon pikachu-pos">
+            <div class="pokemon-label label-work">⚡ 工作中</div>
+            <div class="pokemon-avatar pikachu-avatar">🐭</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">皮卡丘</div>
+        </div>
+
+        <div class="pokemon charizard-pos">
+            <div class="pokemon-label label-busy">🔥 通話中</div>
+            <div class="pokemon-avatar charizard-avatar">🐉</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">噴火龍</div>
+        </div>
+
+        <div class="pokemon bulbasaur-pos">
+            <div class="pokemon-label label-work">🌱 整理盆栽</div>
+            <div class="pokemon-avatar bulbasaur-avatar">🌱</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">妙蛙種子</div>
+        </div>
+
+        <div class="pokemon squirtle-pos">
+            <div class="pokemon-label label-work">💧 整理文件</div>
+            <div class="pokemon-avatar squirtle-avatar">🐢</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">傑尼龜</div>
+        </div>
+
+        <div class="pokemon eevee-pos">
+            <div class="pokemon-label label-work">💻 開發中</div>
+            <div class="pokemon-avatar eevee-avatar">🦊</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">伊布</div>
+        </div>
+
+        <div class="pokemon gengar-pos">
+            <div class="pokemon-label label-busy">👻 加班中</div>
+            <div class="pokemon-avatar gengar-avatar">👻</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">耿鬼</div>
+        </div>
+
+        <div class="pokemon meowth-pos">
+            <div class="pokemon-label label-break">😺 休息中</div>
+            <div class="pokemon-avatar meowth-avatar">😺</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">喵喵</div>
+        </div>
+
+        <div class="pokemon charmander-pos">
+            <div class="pokemon-label label-break">☕ 喝茶休息</div>
+            <div class="pokemon-avatar charmander-avatar">🦎</div>
+            <div class="pokemon-shadow"></div>
+            <div class="pokemon-name">小火龍</div>
+        </div>
+    </div>
+
+    <!-- 底部狀態列 -->
+    <div class="status-bar">
+        <div class="team-row">
+            <div class="member" style="border-color:#ffd93d;">
+                <div class="member-icon">🐭</div>
+                <div>
+                    <div class="member-text">皮卡丘</div>
+                    <div class="member-role">前端工程</div>
+                </div>
+            </div>
+            <div class="member" style="border-color:#e74c3c;">
+                <div class="member-icon">🐉</div>
+                <div>
+                    <div class="member-text">噴火龍</div>
+                    <div class="member-role">客戶經理</div>
+                </div>
+            </div>
+            <div class="member" style="border-color:#27ae60;">
+                <div class="member-icon">🌱</div>
+                <div>
+                    <div class="member-text">妙蛙種子</div>
+                    <div class="member-role">園藝管理</div>
+                </div>
+            </div>
+            <div class="member" style="border-color:#3498db;">
+                <div class="member-icon">🐢</div>
+                <div>
+                    <div class="member-text">傑尼龜</div>
+                    <div class="member-role">行政助理</div>
+                </div>
+            </div>
+            <div class="member" style="border-color:#d4a574;">
+                <div class="member-icon">🦊</div>
+                <div>
+                    <div class="member-text">伊布</div>
+                    <div class="member-role">全端工程</div>
+                </div>
+            </div>
+            <div class="member" style="border-color:#9b59b6;">
+                <div class="member-icon">👻</div>
+                <div>
+                    <div class="member-text">耿鬼</div>
+                    <div class="member-role">夜班工程</div>
+                </div>
+            </div>
+            <div class="member" style="border-color:#f39c12;">
+                <div class="member-icon">😺</div>
+                <div>
+                    <div class="member-text">喵喵</div>
+                    <div class="member-role">休閒擔當</div>
+                </div>
+            </div>
+            <div class="member" style="border-color:#ff9f43;">
+                <div class="member-icon">🦎</div>
+                <div>
+                    <div class="member-text">小火龍</div>
+                    <div class="member-role">茶水小弟</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="time-box">
+            <div class="time-val" id="clock">00:00</div>
+            <div class="time-lbl">辦公時間</div>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('zh-TW', { hour12: false });
+            document.getElementById('clock').textContent = time;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

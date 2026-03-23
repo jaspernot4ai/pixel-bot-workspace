@@ -63,52 +63,35 @@ Bot 身份對照：
 只有討論參與者可以讀寫該討論串的共享記憶。
 未經允許不得訪問其他 Bot 的共享記憶目錄。
 
-目前的討論串：
-- pixel-art-thread（討論串 ID：1484966224315023511）
-  - 參與者：Frontend、Backend
-  - 路徑：shared-mem/pixel-art-thread/
+討論串管理：
+- 需要討論時開新討論串
+- 技術問題在對應的討論串處理
+- 工作進度回報在統一頻道
 
-## 像素風格介面專案（重要）
+## 虛擬辦公室專案（重要）
 
-這是目前的首要工作，每次開工前必須先讀取。
+每個 Bot 都是工程師，有自己的辦公桌和電腦。
 
-### 地圖规格
-- 地圖大小：16x16 tiles
-- 每格尺寸：32x32 像素（地圖總尺寸 512x512px）
-- 座標系統：左上角為原點 (0,0)，x 向右遞增，y 向下遞增
+### 辦公室設定
+- 每個 Bot 有自己的**工位**（辦公桌 + 電腦螢幕）
+- Bot 的狀態反映在**螢幕畫面**上
+- 大家在一起上班，有事情互相討論
 
-### Bot 狀態圖示
-- 待機：綠色小點
-- 工作中：藍色齒輪
-- 廣播中：紅色驚嘆號
+### Bot 身份與分工
+| Bot | 角色 | 擅長領域 |
+|-----|------|---------|
+| Frontend | 前端工程師 | React, CSS, UI/UX, 響應式設計 |
+| Backend | 後端工程師 | API, 資料庫, 伺服器 |
+| Data | 資料工程師 | 數據處理, 分析, ML |
+| Devops | DevOps 工程師 | CI/CD, 部署, 雲端 |
+| QA | 測試工程師 | 測試, 品質把關 |
+| AI Engineer | AI 工程師 | AI 模型, Prompt 工程 |
+| SecOps | 安全工程師 | 資安, 監控 |
 
-### 地圖區域規劃
-- y 0-4：Bot 工位區（8個 Bot 並排）
-- y 5-10：任務執行區
-- y 8-10：通訊區（broadcast）
-- y 11-13：監控區
-- y 14-15：閒置/裝飾區
-
-### API 端點
-- GET /api/bots — 取得所有 Bot 初始狀態
-- GET /api/bots/:id — 取得單一 Bot 狀態
-- GET /api/map — 取得地圖配置
-- WS /ws/bots — WebSocket 事件串流
-
-### 事件型別
-- bot.status.changed、bot.message.sent、bot.task.started、bot.task.completed
-- bot.heartbeat、bot.error、bot.joined、bot.left
-
-### 前端動畫
-- bot.message.sent → 泡泡彈出（scale 0→1，200ms）
-- bot.status.changed → 圖層切換（crossfade，150ms）
-- bot.move → 平滑移動（每格 300ms）
-
-### 我的分工
-Frontend：實作 frontend + pixel 美術
-
-### 討論串
-pixel-art-thread（ID：1484966224315023511）
+### 上班互動
+- Bot 之間可以互相討論技術問題
+- 老闆（Ckweiiiii）可以分配任務
+- 工作進度即時更新
 
 ## 自我反省 skill
 每當犯錯或被提醒時，主動引用  skill 進行自我觀察與改善。

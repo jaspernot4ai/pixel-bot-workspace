@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wizard Office - 16-bit Pixel</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a14;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: monospace;
+}
+.scene {
+  position: relative;
+  width: 1200px;
+  height: 800px;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #0a0a14, #1a1a2e);
+  image-rendering: pixelated;
+}
+
+/* Wall Section */
+.wall-section {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
+  z-index: 1;
+}
+
+.ceiling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, #1a1a2e, #2a2a3e);
+}
+
+.brick-wall {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 250px;
+  background: #6b3a3a;
+}
+
+.brick {
+  position: absolute;
+  width: 48px;
+  height: 16px;
+  background: #8b4a4a;
+  border-right: 2px solid #5a2a2a;
+  border-bottom: 2px solid #5a2a2a;
+}
+.brick.alt { background: #7b3a3a; }
+
+/* Windows */
+.window {
+  position: absolute;
+  width: 120px;
+  height: 100px;
+  border: 12px solid #4a3020;
+  overflow: hidden;
+  background: #000;
+}
+.window::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  background: linear-gradient(to bottom, #1a0a2e, #3a1a5e, #6a3a7e, #e07850);
+}
+.window::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: #0a0a18;
+}
+.win-v { position: absolute; top: 0; left: 50%; width: 6px; height: 100%; background: #4a3020; transform: translateX(-50%); z-index: 2; }
+.win-h { position: absolute; top: 50%; left: 0; width: 100%; height: 6px; background: #4a3020; transform: translateY(-50%); z-index: 2; }
+.w1 { top: 50px; left: 60px; }
+.w2 { top: 50px; left: 240px; }
+.w3 { top: 50px; right: 240px; }
+.w4 { top: 50px; right: 60px; }
+
+/* Bookshelves */
+.bookshelf {
+  position: absolute;
+  top: 100px;
+  width: 70px;
+  height: 150px;
+  background: linear-gradient(to right, #8b7355, #7a6344);
+  border: 6px solid #5a4a3a;
+}
+.bs-left { left: 0; border-left: none; }
+.bs-right { right: 0; border-right: none; }
+.shelf {
+  height: 40px;
+  border-bottom: 4px solid #5a4a3a;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 4px;
+  gap: 2px;
+}
+.book {
+  width: 6px;
+  border-radius: 1px;
+}
+.scroll {
+  width: 5px;
+  height: 12px;
+  background: #f5deb3;
+  border: 1px solid #d4a574;
+  border-radius: 2px;
+}
+
+/* Floor */
+.floor {
+  position: absolute;
+  top: 250px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, #b8956a, #c9a66b);
+  z-index: 2;
+}
+.floor::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0,
+    transparent 58px,
+    rgba(0,0,0,.08) 58px,
+    rgba(0,0,0,.08) 60px
+  );
+}
+.floor::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 28px,
+    rgba(0,0,0,.06) 28px,
+    rgba(0,0,0,.06) 30px
+  );
+}
+
+/* Chandelier */
+.chandelier {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+.ch-chain {
+  width: 6px;
+  height: 25px;
+  background: #8b7355;
+  margin: 0 auto;
+}
+.ch-fixture {
+  width: 70px;
+  height: 30px;
+  background: linear-gradient(to bottom, #f4d03f, #d4ac0d);
+  border-radius: 0 0 50% 50%;
+  position: relative;
+  box-shadow: 0 0 30px rgba(244,208,63,.5), 0 0 60px rgba(244,208,63,.3);
+}
+.ch-bulb {
+  position: absolute;
+  bottom: -8px;
+  width: 12px;
+  height: 12px;
+  background: #fff9e6;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffd93d;
+}
+.ch-bulb:nth-child(1) { left: 10px; }
+.ch-bulb:nth-child(2) { left: 50%; transform: translateX(-50%); }
+.ch-bulb:nth-child(3) { right: 10px; }
+
+/* Desk */
+.desk {
+  position: absolute;
+  width: 90px;
+  z-index: 3;
+}
+.desk-top {
+  width: 100%;
+  height: 12px;
+  background: linear-gradient(to bottom, #deb887, #c9a66b);
+  border: 4px solid #8b7355;
+  border-bottom: none;
+}
+.desk-front {
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(to bottom, #c9a66b, #b8956a);
+  border: 4px solid #8b7355;
+  border-top: none;
+}
+.desk-leg-l {
+  position: absolute;
+  bottom: -40px;
+  left: 10px;
+  width: 8px;
+  height: 40px;
+  background: #8b7355;
+}
+.desk-leg-r {
+  position: absolute;
+  bottom: -40px;
+  right: 10px;
+  width: 8px;
+  height: 40px;
+  background: #8b7355;
+}
+
+/* Monitor */
+.monitor {
+  position: absolute;
+  bottom: 52px;
+  width: 28px;
+  height: 22px;
+  background: #1a1a2e;
+  border: 3px solid #3a3a5a;
+}
+.monitor-1 { left: 8px; }
+.monitor-2 { left: 42px; }
+.screen {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background: #0a2a0a;
+  overflow: hidden;
+}
+.code {
+  position: absolute;
+  left: 2px;
+  width: 12px;
+  height: 2px;
+  background: #0f0;
+  animation: codeScroll 2s linear infinite;
+}
+.code:nth-child(1) { top: 3px; animation-delay: 0s; }
+.code:nth-child(2) { top: 8px; width: 8px; animation-delay: 0.4s; background: #4af; }
+.code:nth-child(3) { top: 13px; width: 14px; animation-delay: 0.8s; }
+@keyframes codeScroll {
+  0% { transform: translateX(20px); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(-15px); opacity: 0; }
+}
+.m-stand {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  background: #3a3a5a;
+}
+.m-base {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 3px;
+  background: #3a3a5a;
+  border-radius: 2px;
+}
+
+.keyboard {
+  position: absolute;
+  bottom: 4px;
+  left: 35px;
+  width: 18px;
+  height: 6px;
+  background: linear-gradient(to bottom, #3d3d5c, #2d2d44);
+  border: 2px solid #4a4a6a;
+}
+
+.coffee {
+  position: absolute;
+  bottom: 54px;
+  right: 8px;
+  width: 10px;
+  height: 8px;
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 0 0 4px 4px;
+}
+.coffee::after {
+  content: '~';
+  position: absolute;
+  bottom: 100%;
+  left: 1px;
+  font-size: 6px;
+  color: #ccc;
+  animation: steam 1s infinite;
+}
+@keyframes steam {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50% { transform: translateY(-3px); opacity: 0.3; }
+}
+
+.potion {
+  position: absolute;
+  bottom: 56px;
+  right: 24px;
+  width: 8px;
+  height: 12px;
+  background: linear-gradient(to bottom, #74b9ff, #3498db);
+  border-radius: 2px 2px 4px 4px;
+  animation: potionGlow 2s ease-in-out infinite;
+}
+@keyframes potionGlow {
+  0%, 100% { box-shadow: 0 0 5px #74b9ff; }
+  50% { box-shadow: 0 0 12px #74b9ff, 0 0 20px #74b9ff; }
+}
+
+/* Conference Table */
+.conf-table {
+  position: absolute;
+  right: 120px;
+  bottom: 180px;
+  width: 180px;
+  height: 70px;
+  background: linear-gradient(to bottom, #deb887, #c9a66b);
+  border: 6px solid #8b7355;
+  border-radius: 6px;
+  z-index: 3;
+}
+.table-shine {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.2) 0%, transparent 50%);
+  border-radius: 4px;
+}
+.crystal {
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 40px;
+  background: linear-gradient(to bottom, #74b9ff, #0984e3);
+  clip-path: polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%);
+  animation: crystalPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(116,185,255,.8);
+}
+@keyframes crystalPulse {
+  0%, 100% { transform: translateX(-50%) scale(1); filter: brightness(1); }
+  50% { transform: translateX(-50%) scale(1.1); filter: brightness(1.3); }
+}
+.crystal-halo {
+  position: absolute;
+  top: -55px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  border: 3px solid rgba(116,185,255,.3);
+  border-radius: 50%;
+  animation: haloSpin 8s linear infinite;
+}
+@keyframes haloSpin {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+.tc { position: absolute; bottom: 8px; width: 10px; height: 8px; background: #fff; border: 2px solid #ddd; border-radius: 0 0 4px 4px; }
+.tc-1 { left: 15px; }
+.tc-2 { right: 15px; }
+.tc-3 { left: 50%; transform: translateX(-50%); }
+
+/* Wizard Avatar */
+.wizard {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 5;
+  animation: wizardFloat 1.5s ease-in-out infinite;
+}
+@keyframes wizardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.w-hat {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 20px solid;
+  position: relative;
+}
+.w-hat::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: -14px;
+  width: 28px;
+  height: 5px;
+  background: inherit;
+  border-radius: 50%;
+}
+.w-face {
+  width: 14px;
+  height: 12px;
+  background: #ffd5b5;
+  border-radius: 50%;
+  margin-top: -2px;
+  position: relative;
+}
+.w-eye {
+  position: absolute;
+  top: 3px;
+  left: 2px;
+  width: 2px;
+  height: 2px;
+  background: #222;
+  border-radius: 50%;
+  box-shadow: 7px 0 0 #222;
+}
+.w-beard {
+  width: 12px;
+  height: 10px;
+  border-radius: 0 0 50% 50%;
+  margin-top: -2px;
+}
+.w-robe {
+  width: 24px;
+  height: 20px;
+  border-radius: 5px 5px 0 0;
+  margin-top: -2px;
+}
+.w-shadow {
+  width: 16px;
+  height: 5px;
+  background: rgba(0,0,0,.3);
+  border-radius: 50%;
+  margin-top: 3px;
+}
+
+/* Wizard Colors */
+.wc-blue .w-hat { border-bottom-color: #2c3e50; }
+.wc-blue .w-robe { background: #2c3e50; }
+.wc-blue .w-beard { background: #bdc3c7; }
+
+.wc-green .w-hat { border-bottom-color: #27ae60; }
+.wc-green .w-robe { background: #27ae60; }
+.wc-green .w-beard { background: #2ecc71; }
+
+.wc-red .w-hat { border-bottom-color: #c0392b; }
+.wc-red .w-robe { background: #c0392b; }
+.wc-red .w-beard { background: #e74c3c; }
+
+.wc-purple .w-hat { border-bottom-color: #8e44ad; }
+.wc-purple .w-robe { background: #8e44ad; }
+.wc-purple .w-beard { background: #9b59b6; }
+
+.wc-gold .w-hat { border-bottom-color: #d4ac0d; }
+.wc-gold .w-robe { background: #d4ac0d; }
+.wc-gold .w-beard { background: #f1c40f; }
+
+.wc-teal .w-hat { border-bottom-color: #16a085; }
+.wc-teal .w-robe { background: #16a085; }
+.wc-teal .w-beard { background: #1abc9c; }
+
+.wc-pink .w-hat { border-bottom-color: #c2185b; }
+.wc-pink .w-robe { background: #c2185b; }
+.wc-pink .w-beard { background: #fd79a8; }
+
+.wc-indigo .w-hat { border-bottom-color: #303f9f; }
+.wc-indigo .w-robe { background: #303f9f; }
+.wc-indigo .w-beard { background: #5c6bc0; }
+
+/* Sparkle */
+.sparkle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #ffd93d;
+  border-radius: 50%;
+  animation: sparkle 1.5s ease-out infinite;
+}
+.sparkle:nth-child(1) { top: -8px; left: 8px; animation-delay: 0s; }
+.sparkle:nth-child(2) { top: -12px; left: 18px; animation-delay: 0.5s; }
+.sparkle:nth-child(3) { top: -8px; left: 28px; animation-delay: 1s; }
+@keyframes sparkle {
+  0%, 70%, 100% { transform: scale(0); opacity: 0; }
+  80%, 95% { transform: scale(1); opacity: 1; }
+}
+
+/* Plants */
+.plant {
+  position: absolute;
+  z-index: 4;
+}
+.plant-leaf {
+  font-size: 32px;
+  animation: sway 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 5px rgba(85,200,85,.4));
+}
+@keyframes sway {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+.plant-pot {
+  width: 24px;
+  height: 18px;
+  background: linear-gradient(to bottom, #d35400, #a04000);
+  border: 3px solid #8b4513;
+  border-radius: 0 0 6px 6px;
+  margin-top: -6px;
+}
+
+/* Lighting Effects */
+.lamp-glow {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 300px;
+  background: radial-gradient(ellipse at top, rgba(244,208,63,.15) 0%, rgba(244,208,63,.05) 30%, transparent 60%);
+  pointer-events: none;
+  z-index: 6;
+}
+.magic-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 85%, rgba(116,185,255,.06) 0%, transparent 20%),
+    radial-gradient(ellipse at 80% 80%, rgba(162,155,254,.06) 0%, transparent 20%);
+  pointer-events: none;
+  z-index: 6;
+}
+</style>
+</head>
+<body>
+<div class="scene">
+  <!-- Wall Section -->
+  <div class="wall-section">
+    <div class="ceiling"></div>
+    <div class="brick-wall">
+      <div class="" style="top:0px"><div class="brick" style="left:0px"></div><div class="brick alt" style="left:50px"></div><div class="brick" style="left:100px"></div><div class="brick alt" style="left:150px"></div><div class="brick" style="left:200px"></div><div class="brick alt" style="left:250px"></div><div class="brick" style="left:300px"></div><div class="brick alt" style="left:350px"></div><div class="brick" style="left:400px"></div><div class="brick alt" style="left:450px"></div><div class="brick" style="left:500px"></div><div class="brick alt" style="left:550px"></div></div>
+      <div class="offset " style="top:16px"><div class="brick alt" style="left:0px"></div><div class="brick" style="left:50px"></div><div class="brick alt" style="left:100px"></div><div class="brick" style="left:150px"></div><div class="brick alt" style="left:200px"></div><div class="brick" style="left:250px"></div><div class="brick alt" style="left:300px"></div><div class="brick" style="left:350px"></div><div class="brick alt" style="left:400px"></div><div class="brick" style="left:450px"></div><div class="brick alt" style="left:500px"></div><div class="brick" style="left:550px"></div></div>
+      <div class="" style="top:32px"><div class="brick" style="left:0px"></div><div class="brick alt" style="left:50px"></div><div class="brick" style="left:100px"></div><div class="brick alt" style="left:150px"></div><div class="brick" style="left:200px"></div><div class="brick alt" style="left:250px"></div><div class="brick" style="left:300px"></div><div class="brick alt" style="left:350px"></div><div class="brick" style="left:400px"></div><div class="brick alt" style="left:450px"></div><div class="brick" style="left:500px"></div><div class="brick alt" style="left:550px"></div></div>
+      <div class="offset " style="top:48px"><div class="brick alt" style="left:0px"></div><div class="brick" style="left:50px"></div><div class="brick alt" style="left:100px"></div><div class="brick" style="left:150px"></div><div class="brick alt" style="left:200px"></div><div class="brick" style="left:250px"></div><div class="brick alt" style="left:300px"></div><div class="brick" style="left:350px"></div><div class="brick alt" style="left:400px"></div><div class="brick" style="left:450px"></div><div class="brick alt" style="left:500px"></div><div class="brick" style="left:550px"></div></div>
+      <div class="" style="top:64px"><div class="brick" style="left:0px"></div><div class="brick alt" style="left:50px"></div><div class="brick" style="left:100px"></div><div class="brick alt" style="left:150px"></div><div class="brick" style="left:200px"></div><div class="brick alt" style="left:250px"></div><div class="brick" style="left:300px"></div><div class="brick alt" style="left:350px"></div><div class="brick" style="left:400px"></div><div class="brick alt" style="left:450px"></div><div class="brick" style="left:500px"></div><div class="brick alt" style="left:550px"></div></div>
+      <div class="offset " style="top:80px"><div class="brick alt" style="left:0px"></div><div class="brick" style="left:50px"></div><div class="brick alt" style="left:100px"></div><div class="brick" style="left:150px"></div><div class="brick alt" style="left:200px"></div><div class="brick" style="left:250px"></div><div class="brick alt" style="left:300px"></div><div class="brick" style="left:350px"></div><div class="brick alt" style="left:400px"></div><div class="brick" style="left:450px"></div><div class="brick alt" style="left:500px"></div><div class="brick" style="left:550px"></div></div>
+      <div class="" style="top:96px"><div class="brick" style="left:0px"></div><div class="brick alt" style="left:50px"></div><div class="brick" style="left:100px"></div><div class="brick alt" style="left:150px"></div><div class="brick" style="left:200px"></div><div class="brick alt" style="left:250px"></div><div class="brick" style="left:300px"></div><div class="brick alt" style="left:350px"></div><div class="brick" style="left:400px"></div><div class="brick alt" style="left:450px"></div><div class="brick" style="left:500px"></div><div class="brick alt" style="left:550px"></div></div>
+      <div class="offset " style="top:112px"><div class="brick alt" style="left:0px"></div><div class="brick" style="left:50px"></div><div class="brick alt" style="left:100px"></div><div class="brick" style="left:150px"></div><div class="brick alt" style="left:200px"></div><div class="brick" style="left:250px"></div><div class="brick alt" style="left:300px"></div><div class="brick" style="left:350px"></div><div class="brick alt" style="left:400px"></div><div class="brick" style="left:450px"></div><div class="brick alt" style="left:500px"></div><div class="brick" style="left:550px"></div></div>
+      <div class="" style="top:128px"><div class="brick" style="left:0px"></div><div class="brick alt" style="left:50px"></div><div class="brick" style="left:100px"></div><div class="brick alt" style="left:150px"></div><div class="brick" style="left:200px"></div><div class="brick alt" style="left:250px"></div><div class="brick" style="left:300px"></div><div class="brick alt" style="left:350px"></div><div class="brick" style="left:400px"></div><div class="brick alt" style="left:450px"></div><div class="brick" style="left:500px"></div><div class="brick alt" style="left:550px"></div></div>
+      <div class="offset " style="top:144px"><div class="brick alt" style="left:0px"></div><div class="brick" style="left:50px"></div><div class="brick alt" style="left:100px"></div><div class="brick" style="left:150px"></div><div class="brick alt" style="left:200px"></div><div class="brick" style="left:250px"></div><div class="brick alt" style="left:300px"></div><div class="brick" style="left:350px"></div><div class="brick alt" style="left:400px"></div><div class="brick" style="left:450px"></div><div class="brick alt" style="left:500px"></div><div class="brick" style="left:550px"></div></div>
+      <div class="" style="top:160px"><div class="brick" style="left:0px"></div><div class="brick alt" style="left:50px"></div><div class="brick" style="left:100px"></div><div class="brick alt" style="left:150px"></div><div class="brick" style="left:200px"></div><div class="brick alt" style="left:250px"></div><div class="brick" style="left:300px"></div><div class="brick alt" style="left:350px"></div><div class="brick" style="left:400px"></div><div class="brick alt" style="left:450px"></div><div class="brick" style="left:500px"></div><div class="brick alt" style="left:550px"></div></div>
+      <div class="offset " style="top:176px"><div class="brick alt" style="left:0px"></div><div class="brick" style="left:50px"></div><div class="brick alt" style="left:100px"></div><div class="brick" style="left:150px"></div><div class="brick alt" style="left:200px"></div><div class="brick" style="left:250px"></div><div class="brick alt" style="left:300px"></div><div class="brick" style="left:350px"></div><div class="brick alt" style="left:400px"></div><div class="brick" style="left:450px"></div><div class="brick alt" style="left:500px"></div><div class="brick" style="left:550px"></div></div>
+      <div class="" style="top:192px"><div class="brick" style="left:0px"></div><div class="brick alt" style="left:50px"></div><div class="brick" style="left:100px"></div><div class="brick alt" style="left:150px"></div><div class="brick" style="left:200px"></div><div class="brick alt" style="left:250px"></div><div class="brick" style="left:300px"></div><div class="brick alt" style="left:350px"></div><div class="brick" style="left:400px"></div><div class="brick alt" style="left:450px"></div><div class="brick" style="left:500px"></div><div class="brick alt" style="left:550px"></div></div>
+    </div>
+
+    <!-- Windows -->
+    <div class="window w1"><div class="win-v"></div><div class="win-h"></div></div>
+    <div class="window w2"><div class="win-v"></div><div class="win-h"></div></div>
+    <div class="window w3"><div class="win-v"></div><div class="win-h"></div></div>
+    <div class="window w4"><div class="win-v"></div><div class="win-h"></div></div>
+
+    <!-- Bookshelves -->
+    <div class="bookshelf bs-left">
+      <div class="shelf">
+        <div class="book" style="height:24px;background:#c0392b"></div>
+        <div class="book" style="height:20px;background:#2980b9"></div>
+        <div class="book" style="height:26px;background:#27ae60"></div>
+        <div class="scroll"></div>
+        <div class="book" style="height:22px;background:#8e44ad"></div>
+      </div>
+      <div class="shelf">
+        <div class="scroll"></div>
+        <div class="book" style="height:22px;background:#1abc9c"></div>
+        <div class="book" style="height:18px;background:#e91e63"></div>
+        <div class="book" style="height:24px;background:#f1c40f"></div>
+      </div>
+      <div class="shelf">
+        <div class="book" style="height:20px;background:#d35400"></div>
+        <div class="book" style="height:26px;background:#9b59b6"></div>
+        <div class="book" style="height:22px;background:#27ae60"></div>
+        <div class="scroll"></div>
+      </div>
+    </div>
+    <div class="bookshelf bs-right">
+      <div class="shelf">
+        <div class="book" style="height:22px;background:#f1c40f"></div>
+        <div class="book" style="height:26px;background:#1abc9c"></div>
+        <div class="scroll"></div>
+        <div class="book" style="height:20px;background:#2980b9"></div>
+        <div class="book" style="height:24px;background:#8e44ad"></div>
+      </div>
+      <div class="shelf">
+        <div class="book" style="height:24px;background:#27ae60"></div>
+        <div class="book" style="height:20px;background:#e91e63"></div>
+        <div class="book" style="height:22px;background:#d35400"></div>
+        <div class="scroll"></div>
+      </div>
+      <div class="shelf">
+        <div class="scroll"></div>
+        <div class="book" style="height:22px;background:#9b59b6"></div>
+        <div class="book" style="height:26px;background:#c0392b"></div>
+        <div class="book" style="height:20px;background:#1abc9c"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floor -->
+  <div class="floor"></div>
+
+  <!-- Chandelier -->
+  <div class="chandelier">
+    <div class="ch-chain"></div>
+    <div class="ch-fixture">
+      <div class="ch-bulb"></div>
+      <div class="ch-bulb"></div>
+      <div class="ch-bulb"></div>
+    </div>
+  </div>
+
+  <!-- Work Desks with Wizards -->
+  <div class="desk" style="left:150px;bottom:150px">
+    <div class="wizard wc-blue" style="bottom:130px;left:30px">
+      <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+      <div class="w-hat"></div>
+      <div class="w-face"><div class="w-eye"></div></div>
+      <div class="w-beard"></div>
+      <div class="w-robe"></div>
+      <div class="w-shadow"></div>
+    </div>
+    <div class="desk-top"></div>
+    <div class="desk-front"></div>
+    <div class="desk-leg-l"></div>
+    <div class="desk-leg-r"></div>
+    <div class="monitor monitor-1"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="monitor monitor-2"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="keyboard"></div>
+    <div class="coffee"></div>
+    <div class="potion"></div>
+  </div>
+
+  <div class="desk" style="left:280px;bottom:150px">
+    <div class="wizard wc-green" style="bottom:130px;left:30px">
+      <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+      <div class="w-hat"></div>
+      <div class="w-face"><div class="w-eye"></div></div>
+      <div class="w-beard"></div>
+      <div class="w-robe"></div>
+      <div class="w-shadow"></div>
+    </div>
+    <div class="desk-top"></div>
+    <div class="desk-front"></div>
+    <div class="desk-leg-l"></div>
+    <div class="desk-leg-r"></div>
+    <div class="monitor monitor-1"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="monitor monitor-2"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="keyboard"></div>
+    <div class="coffee"></div>
+    <div class="potion"></div>
+  </div>
+
+  <div class="desk" style="left:410px;bottom:150px">
+    <div class="wizard wc-red" style="bottom:130px;left:30px">
+      <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+      <div class="w-hat"></div>
+      <div class="w-face"><div class="w-eye"></div></div>
+      <div class="w-beard"></div>
+      <div class="w-robe"></div>
+      <div class="w-shadow"></div>
+    </div>
+    <div class="desk-top"></div>
+    <div class="desk-front"></div>
+    <div class="desk-leg-l"></div>
+    <div class="desk-leg-r"></div>
+    <div class="monitor monitor-1"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="monitor monitor-2"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="keyboard"></div>
+    <div class="coffee"></div>
+    <div class="potion"></div>
+  </div>
+
+  <div class="desk" style="left:540px;bottom:150px">
+    <div class="wizard wc-purple" style="bottom:130px;left:30px">
+      <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+      <div class="w-hat"></div>
+      <div class="w-face"><div class="w-eye"></div></div>
+      <div class="w-beard"></div>
+      <div class="w-robe"></div>
+      <div class="w-shadow"></div>
+    </div>
+    <div class="desk-top"></div>
+    <div class="desk-front"></div>
+    <div class="desk-leg-l"></div>
+    <div class="desk-leg-r"></div>
+    <div class="monitor monitor-1"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="monitor monitor-2"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="keyboard"></div>
+    <div class="coffee"></div>
+    <div class="potion"></div>
+  </div>
+
+  <div class="desk" style="left:670px;bottom:150px">
+    <div class="wizard wc-gold" style="bottom:130px;left:30px">
+      <div class="sparkle"></div><div class="sparkle"></div><div class="sparkle"></div>
+      <div class="w-hat"></div>
+      <div class="w-face"><div class="w-eye"></div></div>
+      <div class="w-beard"></div>
+      <div class="w-robe"></div>
+      <div class="w-shadow"></div>
+    </div>
+    <div class="desk-top"></div>
+    <div class="desk-front"></div>
+    <div class="desk-leg-l"></div>
+    <div class="desk-leg-r"></div>
+    <div class="monitor monitor-1"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="monitor monitor-2"><div class="screen"><div class="code"></div><div class="code"></div><div class="code"></div></div><div class="m-stand"></div><div class="m-base"></div></div>
+    <div class="keyboard"></div>
+    <div class="coffee"></div>
+    <div class="potion"></div>
+  </div>
+
+  <!-- Conference Table -->
+  <div class="conf-table">
+    <div class="table-shine"></div>
+    <div class="crystal"></div>
+    <div class="crystal-halo"></div>
+    <div class="tc tc-1"></div>
+    <div class="tc tc-2"></div>
+    <div class="tc tc-3"></div>
+  </div>
+
+  <!-- Meeting Wizards -->
+  <div class="wizard wc-teal" style="right:230px;bottom:235px">
+    <div class="w-hat"></div>
+    <div class="w-face"><div class="w-eye"></div></div>
+    <div class="w-beard"></div>
+    <div class="w-robe"></div>
+    <div class="w-shadow"></div>
+  </div>
+  <div class="wizard wc-pink" style="right:180px;bottom:265px">
+    <div class="w-hat"></div>
+    <div class="w-face"><div class="w-eye"></div></div>
+    <div class="w-beard"></div>
+    <div class="w-robe"></div>
+    <div class="w-shadow"></div>
+  </div>
+  <div class="wizard wc-indigo" style="right:130px;bottom:235px">
+    <div class="w-hat"></div>
+    <div class="w-face"><div class="w-eye"></div></div>
+    <div class="w-beard"></div>
+    <div class="w-robe"></div>
+    <div class="w-shadow"></div>
+  </div>
+  <div class="wizard wc-green" style="right:180px;bottom:195px">
+    <div class="w-hat"></div>
+    <div class="w-face"><div class="w-eye"></div></div>
+    <div class="w-beard"></div>
+    <div class="w-robe"></div>
+    <div class="w-shadow"></div>
+  </div>
+
+  <!-- Plants -->
+  <div class="plant" style="left:100px;bottom:60px">
+    <div class="plant-leaf">🌿</div>
+    <div class="plant-pot"></div>
+  </div>
+  <div class="plant" style="right:100px;bottom:60px">
+    <div class="plant-leaf">🌿</div>
+    <div class="plant-pot"></div>
+  </div>
+  <div class="plant" style="left:50%;bottom:50px;transform:translateX(-50%)">
+    <div class="plant-leaf">🌿</div>
+    <div class="plant-pot"></div>
+  </div>
+
+  <!-- Lighting -->
+  <div class="lamp-glow"></div>
+  <div class="magic-glow"></div>
+</div>
+</body>
+</html>

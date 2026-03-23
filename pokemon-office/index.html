@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 寶可夢像素辦公室 - 等距視角</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #87CEEB 0%, #98D8C8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #ffd93d;
+            font-size: 32px;
+            text-shadow: 4px 4px 0 #c4a000, -2px -2px 0 #fff5;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #4a4a6a;
+            font-size: 14px;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 0 #fff;
+        }
+
+        /* === 等距場景容器 === */
+        .scene-container {
+            position: relative;
+            width: 1000px;
+            height: 600px;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #a8e6cf 0%, #88d8b0 60%, #6bc9a8 100%);
+            border: 6px solid #4a4a6a;
+            border-radius: 12px;
+            box-shadow: 
+                0 0 0 4px #ffd93d,
+                0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        /* === 等距地板瓷磚 === */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 350px;
+            background: 
+                repeating-conic-gradient(
+                    from 0deg at 50px 50px,
+                    #e8d4b8 0deg 90deg,
+                    #d4c4a8 90deg 180deg
+                );
+            background-size: 100px 100px;
+            transform: perspective(500px) rotateX(60deg);
+            transform-origin: bottom;
+        }
+
+        /* === 牆壁 === */
+        .wall-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 250px;
+            background: linear-gradient(to bottom, #f5e6d3, #e8d4c4);
+            border-bottom: 8px solid #8b7355;
+        }
+
+        /* 牆壁裝飾 - 海報 */
+        .wall-poster {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            background: #fff;
+            border: 4px solid #8b7355;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .poster-1 { top: 30px; left: 100px; }
+        .poster-2 { top: 30px; left: 250px; }
+        .poster-3 { top: 30px; right: 250px; }
+        .poster-4 { top: 30px; right: 100px; }
+
+        /* 時鐘 */
+        .wall-clock {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            border: 5px solid #8b7355;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* === 等距辦公桌 === */
+        .desk {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+        }
+
+        /* 桌面 */
+        .desk-top {
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to bottom, #d4a574, #b8956a);
+            border: 3px solid #8b7355;
+            transform: skewY(-30deg);
+            transform-origin: bottom left;
+        }
+
+        .desk-front {
+            position: absolute;
+            top: 17px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(to right, #c49464, #b8956a);
+            border: 3px solid #8b7355;
+            border-top: none;
+        }
+
+        .desk-side {
+            position: absolute;
+            top: 17px;
+            right: -20px;
+            width: 40px;
+            height: 60px;
+            background: #b8956a;
+            border: 3px solid #8b7355;
+            border-left: none;
+            transform: skewY(30deg);
+            transform-origin: top left;
+        }
+
+        /* 顯示器 */
+        .monitor {
+            position: absolute;
+            width: 50px;
+            height: 40px;
+            background: #2d2d44;
+            border: 3px solid #1a1a2e;
+            border-radius: 3px;
+            bottom: 50px;
+            left: 20px;
+            overflow: hidden;
+        }
+
+        .monitor-screen {
+            width: 100%;
+            height: 100%;
+            background: #1a3a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6px;
+            color: #00ff00;
+            animation: screenFlicker 0.1s infinite;
+        }
+
+        @keyframes screenFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.98; }
+        }
+
+        .monitor-stand {
+            position: absolute;
+            bottom: 40px;
+            left: 32px;
+            width: 8px;
+            height: 10px;
+            background: #4a4a6a;
+        }
+
+        .monitor-base {
+            position: absolute;
+            bottom: 38px;
+            left: 25px;
+            width: 22px;
+            height: 4px;
+            background: #4a4a6a;
+            border-radius: 2px;
+        }
+
+        /* 鍵盤 */
+        .keyboard {
+            position: absolute;
+            bottom: 30px;
+            left: 25px;
+            width: 35px;
+            height: 10px;
+            background: #3d3d5c;
+            border: 2px solid #2d2d44;
+            border-radius: 2px;
+        }
+
+        /* 咖啡杯 */
+        .coffee {
+            position: absolute;
+            bottom: 55px;
+            right: 15px;
+            width: 15px;
+            height: 12px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .coffee::before {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 2px;
+            width: 8px;
+            height: 8px;
+            border: 2px solid #ddd;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .steam {
+            position: absolute;
+            bottom: 100%;
+            left: 3px;
+            font-size: 8px;
+            animation: steamRise 1s infinite;
+        }
+
+        @keyframes steamRise {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.7; }
+            50% { transform: translateY(-5px) translateX(2px); opacity: 0.3; }
+        }
+
+        /* 檔案櫃 */
+        .filing-cabinet {
+            position: absolute;
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(to right, #7a8a9a, #6a7a8a);
+            border: 3px solid #5a6a7a;
+            border-radius: 3px;
+        }
+
+        .cabinet-drawer {
+            height: 20px;
+            border-bottom: 2px solid #5a6a7a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cabinet-handle {
+            width: 15px;
+            height: 4px;
+            background: #4a5a6a;
+            border-radius: 2px;
+        }
+
+        /* 書架 */
+        .bookshelf {
+            position: absolute;
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(to right, #8b7355, #7a6344);
+            border: 4px solid #5a4a3a;
+        }
+
+        .shelf {
+            height: 25px;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 5px;
+            gap: 3px;
+        }
+
+        .book {
+            width: 8px;
+            height: 18px;
+            border-radius: 1px;
+        }
+
+        .book:nth-child(1) { background: #e74c3c; height: 20px; }
+        .book:nth-child(2) { background: #3498db; height: 16px; }
+        .book:nth-child(3) { background: #2ecc71; height: 18px; }
+        .book:nth-child(4) { background: #f39c12; height: 15px; }
+        .book:nth-child(5) { background: #9b59b6; height: 19px; }
+        .book:nth-child(6) { background: #1abc9c; height: 17px; }
+
+        /* 藥水架 */
+        .potion-shelf {
+            position: absolute;
+            display: flex;
+            gap: 5px;
+        }
+
+        .potion {
+            width: 12px;
+            height: 18px;
+            border-radius: 3px 3px 6px 6px;
+            position: relative;
+        }
+
+        .potion::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 3px;
+            width: 6px;
+            height: 6px;
+            background: #8b7355;
+            border-radius: 2px;
+        }
+
+        .potion-red { background: linear-gradient(to bottom, #ff6b6b, #e74c3c); }
+        .potion-blue { background: linear-gradient(to bottom, #74b9ff, #3498db); }
+        .potion-green { background: linear-gradient(to bottom, #55efc4, #00b894); }
+        .potion-yellow { background: linear-gradient(to bottom, #ffeaa7, #fdcb6e); }
+
+        /* === 寶可夢角色 === */
+        .pokemon {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: pokemonBounce 0.6s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes pokemonBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .pokemon-sprite {
+            font-size: 40px;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+        }
+
+        .pokemon-shadow {
+            width: 30px;
+            height: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 50%;
+            margin-top: -5px;
+        }
+
+        /* 皮卡丘 */
+        .pikachu { bottom: 180px; left: 100px; }
+        
+        /* 噴火龍 */
+        .charizard { bottom: 280px; left: 280px; }
+        
+        /* 妙蛙種子 */
+        .bulbasaur { bottom: 150px; left: 450px; }
+        
+        /* 傑尼龜 */
+        .squirtle { bottom: 320px; right: 200px; }
+        
+        /* 伊布 */
+        .eevee { bottom: 200px; right: 80px; }
+        
+        /* 喵喵 */
+        .meowth { bottom: 380px; right: 350px; }
+        
+        /* 耿鬼 */
+        .gengar { bottom: 250px; left: 200px; }
+
+        /* 工作狀態標籤 */
+        .work-label {
+            position: absolute;
+            top: -25px;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            white-space: nowrap;
+            border: 2px solid #ffd93d;
+        }
+
+        /* === 辦公室家具佈局 === */
+        
+        /* 第一排桌子 */
+        .desk-1 { bottom: 150px; left: 80px; }
+        .desk-2 { bottom: 250px; left: 260px; }
+        .desk-3 { bottom: 120px; left: 440px; }
+        .desk-4 { bottom: 300px; right: 180px; }
+        .desk-5 { bottom: 170px; right: 60px; }
+        .desk-6 { bottom: 360px; right: 330px; }
+
+        /* 檔案櫃 */
+        .cabinet-1 { bottom: 50px; left: 20px; }
+        .cabinet-2 { bottom: 50px; right: 20px; }
+
+        /* 書架 */
+        .bookshelf-1 { bottom: 50px; left: 180px; }
+        .bookshelf-2 { bottom: 50px; right: 150px; }
+
+        /* 飲水機 */
+        .water-cooler {
+            position: absolute;
+            bottom: 400px;
+            right: 80px;
+            width: 40px;
+            height: 80px;
+        }
+
+        .cooler-body {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(to right, #e0e0e0, #c0c0c0);
+            border: 3px solid #a0a0a0;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .cooler-top {
+            width: 30px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 50% 50% 0 0;
+            position: absolute;
+            top: -15px;
+            left: 2px;
+        }
+
+        .cooler-button {
+            position: absolute;
+            bottom: 15px;
+            left: 10px;
+            width: 15px;
+            height: 15px;
+            background: #e74c3c;
+            border-radius: 50%;
+            border: 2px solid #c0392b;
+        }
+
+        .water-drip {
+            position: absolute;
+            bottom: 5px;
+            left: 18px;
+            width: 4px;
+            height: 4px;
+            background: #74b9ff;
+            border-radius: 50%;
+            animation: waterDrip 1s infinite;
+        }
+
+        @keyframes waterDrip {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(30px); opacity: 0; }
+        }
+
+        /* 盆栽 */
+        .plant-pot {
+            position: absolute;
+            bottom: 55px;
+            width: 30px;
+            height: 25px;
+            background: linear-gradient(to right, #d35400, #a04000);
+            border-radius: 0 0 10px 10px;
+            border: 3px solid #8b4513;
+        }
+
+        .plant-leaves {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            animation: leavesSway 2s ease-in-out infinite;
+        }
+
+        @keyframes leavesSway {
+            0%, 100% { transform: translateX(-50%) rotate(-5deg); }
+            50% { transform: translateX(-50%) rotate(5deg); }
+        }
+
+        .plant-1 { left: 350px; }
+        .plant-2 { right: 120px; }
+
+        /* 休息區沙發 */
+        .sofa {
+            position: absolute;
+            bottom: 450px;
+            left: 50px;
+            width: 100px;
+            height: 50px;
+        }
+
+        .sofa-back {
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(to bottom, #9b59b6, #8e44ad);
+            border-radius: 10px 10px 0 0;
+            border: 3px solid #7d3c98;
+        }
+
+        .sofa-seat {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to bottom, #8e44ad, #7d3c98);
+            border-radius: 0 0 5px 5px;
+        }
+
+        /* 掛畫裝飾 */
+        .wall-art {
+            position: absolute;
+            font-size: 28px;
+            top: 60px;
+        }
+
+        .art-1 { left: 150px; }
+        .art-2 { left: 350px; }
+        .art-3 { right: 150px; }
+
+        /* === 底部 UI === */
+        .info-panel {
+            margin-top: 20px;
+            background: linear-gradient(to bottom, #3d3d5c, #2d2d44);
+            border: 4px solid #4a3728;
+            border-radius: 10px;
+            padding: 15px 25px;
+            display: flex;
+            gap: 30px;
+            box-shadow: inset 3px 3px 0 #5a5a7a, inset -3px -3px 0 #1a1a2e;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffd93d;
+            font-size: 12px;
+        }
+
+        .info-icon {
+            font-size: 20px;
+        }
+
+        .info-label {
+            color: #95a5a6;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 寶可夢像素辦公室 🍁</h1>
+    <p class="subtitle">等距視角 | 16-bit 復古風格 | 快樂上班中！</p>
+
+    <div class="scene-container">
+        <!-- 牆壁背景 -->
+        <div class="wall-back">
+            <!-- 牆壁裝飾 -->
+            <div class="wall-poster poster-1">🌟</div>
+            <div class="wall-poster poster-2">🎮</div>
+            <div class="wall-poster poster-3">🏆</div>
+            <div class="wall-poster poster-4">❤️</div>
+            <div class="wall-clock">🕐</div>
+        </div>
+
+        <!-- 等距地板 -->
+        <div class="floor"></div>
+
+        <!-- 書架 -->
+        <div class="bookshelf bookshelf-1">
+            <div class="shelf">
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+            </div>
+            <div class="shelf">
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+            </div>
+            <div class="shelf">
+                <div class="potion-shelf" style="margin-left: 5px;">
+                    <div class="potion potion-red"></div>
+                    <div class="potion potion-blue"></div>
+                    <div class="potion potion-green"></div>
+                    <div class="potion potion-yellow"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bookshelf bookshelf-2">
+            <div class="shelf">
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+            </div>
+            <div class="shelf">
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+                <div class="book"></div>
+            </div>
+            <div class="shelf">
+                <div class="potion-shelf" style="margin-left: 5px;">
+                    <div class="potion potion-blue"></div>
+                    <div class="potion potion-red"></div>
+                    <div class="potion potion-green"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 檔案櫃 -->
+        <div class="filing-cabinet cabinet-1">
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+        </div>
+
+        <div class="filing-cabinet cabinet-2">
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+            <div class="cabinet-drawer"><div class="cabinet-handle"></div></div>
+        </div>
+
+        <!-- 盆栽 -->
+        <div class="plant-pot plant-1">
+            <div class="plant-leaves">🌿</div>
+        </div>
+        <div class="plant-pot plant-2">
+            <div class="plant-leaves">🌱</div>
+        </div>
+
+        <!-- 飲水機 -->
+        <div class="water-cooler">
+            <div class="cooler-top"></div>
+            <div class="cooler-body">
+                <div class="cooler-button"></div>
+                <div class="water-drip"></div>
+            </div>
+        </div>
+
+        <!-- 辦公桌 -->
+        <div class="desk desk-1">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="desk-side"></div>
+            <div class="monitor">
+                <div class="monitor-screen">code_</div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+            <div class="keyboard"></div>
+            <div class="coffee">
+                <div class="steam">☁️</div>
+            </div>
+        </div>
+
+        <div class="desk desk-2">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="desk-side"></div>
+            <div class="monitor">
+                <div class="monitor-screen">CALL...</div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+            <div class="keyboard"></div>
+        </div>
+
+        <div class="desk desk-3">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="desk-side"></div>
+            <div class="monitor">
+                <div class="monitor-screen">TRAIN_</div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+            <div class="keyboard"></div>
+            <div class="coffee"></div>
+        </div>
+
+        <div class="desk desk-4">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="desk-side"></div>
+            <div class="monitor">
+                <div class="monitor-screen">FILES</div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+            <div class="keyboard"></div>
+        </div>
+
+        <div class="desk desk-5">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="desk-side"></div>
+            <div class="monitor">
+                <div class="monitor-screen">REST_</div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+            <div class="keyboard"></div>
+        </div>
+
+        <div class="desk desk-6">
+            <div class="desk-top"></div>
+            <div class="desk-front"></div>
+            <div class="desk-side"></div>
+            <div class="monitor">
+                <div class="monitor-screen">^_^</div>
+            </div>
+            <div class="monitor-stand"></div>
+            <div class="monitor-base"></div>
+            <div class="keyboard"></div>
+        </div>
+
+        <!-- 沙發休息區 -->
+        <div class="sofa">
+            <div class="sofa-back"></div>
+            <div class="sofa-seat"></div>
+        </div>
+
+        <!-- 寶可夢角色 -->
+        <div class="pokemon pikachu">
+            <div class="work-label">⚡ 打字中...</div>
+            <div class="pokemon-sprite">🐭</div>
+            <div class="pokemon-shadow"></div>
+        </div>
+
+        <div class="pokemon charizard">
+            <div class="work-label">🔥 打电话中</div>
+            <div class="pokemon-sprite">🐉</div>
+            <div class="pokemon-shadow"></div>
+        </div>
+
+        <div class="pokemon bulbasaur">
+            <div class="work-label">🌱 整理盆栽</div>
+            <div class="pokemon-sprite">🌱</div>
+            <div class="pokemon-shadow"></div>
+        </div>
+
+        <div class="pokemon squirtle">
+            <div class="work-label">💧 整理文件</div>
+            <div class="pokemon-sprite">🐢</div>
+            <div class="pokemon-shadow"></div>
+        </div>
+
+        <div class="pokemon eevee">
+            <div class="work-label">💻 工作中</div>
+            <div class="pokemon-sprite">🦊</div>
+            <div class="pokemon-shadow"></div>
+        </div>
+
+        <div class="pokemon meowth">
+            <div class="work-label">😺 休息中</div>
+            <div class="pokemon-sprite">😺</div>
+            <div class="pokemon-shadow"></div>
+        </div>
+
+        <div class="pokemon gengar">
+            <div class="work-label">👻 加班中</div>
+            <div class="pokemon-sprite">👻</div>
+            <div class="pokemon-shadow"></div>
+        </div>
+    </div>
+
+    <!-- 底部資訊列 -->
+    <div class="info-panel">
+        <div class="info-item">
+            <span class="info-icon">🐭</span>
+            <div>
+                <div>皮卡丘</div>
+                <div class="info-label">打字中</div>
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-icon">🐉</span>
+            <div>
+                <div>喷火龙</div>
+                <div class="info-label">通话中</div>
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-icon">🌱</span>
+            <div>
+                <div>妙蛙种子</div>
+                <div class="info-label">整理盆栽</div>
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-icon">🐢</span>
+            <div>
+                <div>杰尼龟</div>
+                <div class="info-label">整理文件</div>
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-icon">🦊</span>
+            <div>
+                <div>伊布</div>
+                <div class="info-label">工作中</div>
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-icon">😺</span>
+            <div>
+                <div>喵喵</div>
+                <div class="info-label">休息中</div>
+            </div>
+        </div>
+        <div class="info-item">
+            <span class="info-icon">👻</span>
+            <div>
+                <div>耿鬼</div>
+                <div class="info-label">加班中</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

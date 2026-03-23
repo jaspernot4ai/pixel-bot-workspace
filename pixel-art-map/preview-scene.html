@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Art World - Bot Village</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: monospace;
+      background: #1a1a2e;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    h1 {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #00ff88;
+      text-shadow: 0 0 10px #00ff88;
+      letter-spacing: 4px;
+    }
+    
+    .scene-container {
+      position: relative;
+      border: 4px solid #333;
+      background: #0f0f1a;
+      box-shadow: 0 0 30px rgba(0,255,136,0.2);
+    }
+    
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+    }
+    
+    .info {
+      margin-top: 15px;
+      font-size: 10px;
+      color: #666;
+      text-align: center;
+    }
+    
+    .legend {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+      font-size: 9px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>◆ BOT VILLAGE ◆</h1>
+  <div class="scene-container">
+    <canvas id="world" width="256" height="192"></canvas>
+  </div>
+  <div class="info">16x16 Pixel World | Animated Characters</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div>Grass</div>
+    <div class="legend-item"><div class="legend-color" style="background:#4a4a6a"></div>House</div>
+    <div class="legend-item"><div class="legend-color" style="background:#00ff88"></div>Bot</div>
+    <div class="legend-item"><div class="legend-color" style="background:#ffcc00"></div>Path</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('world');
+    const ctx = canvas.getContext('2d');
+    
+    // Pixel size for our world
+    const PX = 2; // each "pixel" is 2x2 real pixels
+    
+    // Color palette
+    const COLORS = {
+      sky: '#1a1a3a',
+      grass: '#22c55e',
+      grassDark: '#16a34a',
+      house: '#4a4a6a',
+      houseDark: '#3a3a5a',
+      houseLight: '#6a6a8a',
+      roof: '#8b4513',
+      roofDark: '#6b3510',
+      door: '#8b4513',
+      window: '#00ff88',
+      path: '#d4a574',
+      pathDark: '#b8956a',
+      botIdle: '#22c55e',
+      botWork: '#3b82f6',
+      botBroadcast: '#ef4444',
+      botError: '#ff0000',
+    };
+    
+    // Bot characters
+    const bots = [
+      { x: 24, y: 80, status: 'idle', name: 'FRONTEND' },
+      { x: 72, y: 80, status: 'working', name: 'BACKEND' },
+      { x: 120, y: 80, status: 'idle', name: 'DATA' },
+      { x: 168, y: 80, status: 'broadcasting', name: 'DEVOPS' },
+    ];
+    
+    // Animation frame
+    let frame = 0;
+    
+    // Draw a pixel (scaled)
+    function pixel(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * PX, y * PX, PX, PX);
+    }
+    
+    // Draw a rectangle of pixels
+    function rect(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * PX, y * PX, w * PX, h * PX);
+    }
+    
+    // Draw the sky
+    function drawSky() {
+      rect(0, 0, 128, 40, COLORS.sky);
+      // Stars
+      for (let i = 0; i < 20; i++) {
+        const sx = (i * 17 + frame * 0.1) % 128;
+        const sy = (i * 7) % 40;
+        if (Math.sin(frame * 0.1 + i) > 0) {
+          pixel(sx, sy, '#ffffff');
+        }
+      }
+    }
+    
+    // Draw grass with variation
+    function drawGrass() {
+      for (let y = 40; y < 60; y++) {
+        for (let x = 0; x < 128; x++) {
+          const noise = Math.sin(x * 0.5) * Math.cos(y * 0.5);
+          pixel(x, y, noise > 0 ? COLORS.grass : COLORS.grassDark);
+        }
+      }
+    }
+    
+    // Draw a house at position
+    function drawHouse(hx, hy, num) {
+      // House body
+      rect(hx, hy, 20, 16, COLORS.house);
+      rect(hx + 1, hy + 1, 18, 14, COLORS.houseDark);
+      
+      // Roof
+      for (let i = 0; i < 11; i++) {
+        const rw = 22 - Math.abs(i - 5) * 2;
+        rect(hx - 1 + i, hy - 6 + Math.abs(i - 5), rw, 1, i < 5 ? COLORS.roof : COLORS.roofDark);
+      }
+      
+      // Door
+      rect(hx + 8, hy + 8, 4, 8, COLORS.door);
+      
+      // Windows (lit up)
+      if (Math.sin(frame * 0.05 + num) > 0) {
+        rect(hx + 2, hy + 3, 4, 4, COLORS.window);
+        rect(hx + 14, hy + 3, 4, 4, COLORS.window);
+      } else {
+        rect(hx + 2, hy + 3, 4, 4, '#333');
+        rect(hx + 14, hy + 3, 4, 4, '#333');
+      }
+      
+      // House number
+      ctx.fillStyle = '#fff';
+      ctx.font = '6px monospace';
+      ctx.fillText(num, (hx + 9) * PX, (hy + 14) * PX);
+    }
+    
+    // Draw a simple tree
+    function drawTree(tx, ty) {
+      // Trunk
+      rect(tx + 3, ty + 8, 2, 6, '#8b4513');
+      // Leaves
+      rect(tx + 1, ty + 4, 6, 5, '#228b22');
+      rect(tx + 2, ty + 2, 4, 3, '#32cd32');
+      rect(tx + 3, ty, 2, 2, '#32cd32');
+    }
+    
+    // Draw path tiles
+    function drawPath() {
+      const pathY = 60;
+      for (let x = 0; x < 128; x++) {
+        const offset = Math.sin(frame * 0.02 + x * 0.3) > 0 ? 0 : 1;
+        pixel(x, pathY + offset, x % 2 === 0 ? COLORS.path : COLORS.pathDark);
+      }
+    }
+    
+    // Draw a bot character (16x16 sprite)
+    function drawBot(bot) {
+      const bx = Math.floor(bot.x / 8);
+      const by = Math.floor(bot.y / 8);
+      const bounce = Math.sin(frame * 0.15 + bot.x) * 1;
+      
+      const color = bot.status === 'idle' ? COLORS.botIdle :
+                    bot.status === 'working' ? COLORS.botWork :
+                    bot.status === 'broadcasting' ? COLORS.botBroadcast : COLORS.botError;
+      
+      // Shadow
+      rect(bx + 2, by + 14 + bounce, 4, 2, '#00000044');
+      
+      // Body (8x12)
+      rect(bx + 2, by + 4 + bounce, 4, 8, color);
+      
+      // Head (6x6)
+      rect(bx + 1, by + bounce, 6, 5, color);
+      
+      // Eyes
+      pixel(bx + 2, by + 2 + bounce, '#fff');
+      pixel(bx + 5, by + 2 + bounce, '#fff');
+      pixel(bx + 2, by + 3 + bounce, '#000');
+      pixel(bx + 5, by + 3 + bounce, '#000');
+      
+      // Legs (animate)
+      const legOffset = Math.sin(frame * 0.2 + bot.x) * 1;
+      rect(bx + 2, by + 12 + bounce, 2, 2 + legOffset, '#333');
+      rect(bx + 4, by + 12 + bounce, 2, 2 - legOffset, '#333');
+      
+      // Status indicator
+      if (bot.status === 'working') {
+        // Gear icon above
+        rect(bx + 3, by - 3 + bounce, 2, 2, '#888');
+        if (frame % 10 < 5) rect(bx + 2, by - 2 + bounce, 4, 1, '#888');
+      } else if (bot.status === 'broadcasting') {
+        // Broadcast waves
+        pixel(bx + 7, by + bounce, color);
+        if (frame % 8 < 4) pixel(bx + 8, by + 1 + bounce, color);
+        if (frame % 8 < 2) pixel(bx + 9, by + 2 + bounce, color);
+      }
+      
+      // Name tag
+      ctx.fillStyle = '#fff';
+      ctx.font = '5px monospace';
+      ctx.fillText(bot.name, bx * PX, (by + 18) * PX);
+    }
+    
+    // Draw clouds
+    function drawClouds() {
+      ctx.fillStyle = '#ffffff33';
+      const cx = (frame * 0.3) % 140;
+      ctx.beginPath();
+      ctx.ellipse(cx, 15, 12, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx + 15, 18, 8, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    
+    // Main draw loop
+    function draw() {
+      frame++;
+      
+      // Clear
+      ctx.fillStyle = COLORS.sky;
+      ctx.fillRect(0, 0, 256, 192);
+      
+      drawSky();
+      drawClouds();
+      drawGrass();
+      drawPath();
+      
+      // Houses
+      drawHouse(8, 48, 1);
+      drawHouse(56, 48, 2);
+      drawHouse(104, 48, 3);
+      drawHouse(152, 48, 4);
+      
+      // Trees
+      drawTree(200, 50);
+      drawTree(220, 52);
+      drawTree(36, 52);
+      
+      // Bots
+      for (const bot of bots) {
+        drawBot(bot);
+      }
+      
+      // Water/pond decoration
+      if (frame % 60 < 30) {
+        ctx.fillStyle = '#3b82f644';
+        ctx.beginPath();
+        ctx.ellipse(230, 100, 10, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      requestAnimationFrame(draw);
+    }
+    
+    draw();
+  </script>
+</body>
+</html>
