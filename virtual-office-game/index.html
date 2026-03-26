@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍁 虛擬辦公室 - MapleStory 風格</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; image-rendering: pixelated; }
+
+        :root {
+            --sky-top: #87CEEB;
+            --sky-bottom: #b4d7e8;
+            --building: #8b7355;
+            --building-dark: #6b5344;
+            --building-light: #a08060;
+            --window: #4a90a4;
+            --window-dark: #357a8a;
+            --floor: #d4a574;
+            --floor-dark: #b8956a;
+        }
+
+        body {
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            width: 960px;
+            height: 540px;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid #2d2d44;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.3), 0 0 30px rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+
+        .sky {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 180px;
+            background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+        }
+
+        .sun {
+            position: absolute;
+            top: 30px;
+            right: 60px;
+            width: 50px;
+            height: 50px;
+            background: #ffd93d;
+            border-radius: 50%;
+            box-shadow: 0 0 40px #ffd93d, 0 0 80px rgba(255,217,61,0.5);
+            animation: sunPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes sunPulse {
+            0%, 100% { box-shadow: 0 0 40px #ffd93d, 0 0 80px rgba(255,217,61,0.5); }
+            50% { box-shadow: 0 0 60px #ffd93d, 0 0 100px rgba(255,217,61,0.7); }
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+        }
+
+        .cloud-1 { width: 80px; height: 30px; top: 40px; left: -100px; animation: cloudFloat 25s linear infinite; }
+        .cloud-2 { width: 100px; height: 35px; top: 80px; left: -150px; animation: cloudFloat 30s linear infinite 5s; }
+        .cloud-3 { width: 70px; height: 25px; top: 60px; left: -80px; animation: cloudFloat 20s linear infinite 10s; }
+
+        @keyframes cloudFloat {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(1200px); }
+        }
+
+        .mountains {
+            position: absolute;
+            bottom: 360px;
+            left: 0;
+            right: 0;
+            height: 80px;
+        }
+
+        .mountain {
+            position: absolute;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 80px solid #7a9a6a;
+        }
+
+        .mountain-1 { left: 30px; border-bottom-color: #6a8a5a; }
+        .mountain-2 { left: 180px; border-bottom-color: #8aaa7a; }
+        .mountain-3 { left: 400px; border-bottom-color: #7a9a6a; }
+        .mountain-4 { left: 650px; border-bottom-color: #6a8a5a; }
+        .mountain-5 { left: 820px; border-bottom-color: #8aaa7a; }
+
+        .building-main {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 920px;
+            height: 380px;
+            background: linear-gradient(to bottom, var(--building-light), var(--building), var(--building-dark));
+        }
+
+        .roof {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 940px;
+            height: 40px;
+            background: linear-gradient(to bottom, #c0392b, #a02a1b);
+            border-radius: 5px 5px 0 0;
+        }
+
+        .roof::before {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: repeating-linear-gradient(90deg, #a02a1b 0px, #a02a1b 25px, #c0392b 25px, #c0392b 50px);
+        }
+
+        .window-row {
+            position: absolute;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 60px;
+        }
+
+        .window-row-1 { top: 25px; }
+        .window-row-2 { top: 110px; }
+        .window-row-3 { top: 195px; }
+
+        .pixel-window {
+            width: 90px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--window), var(--window-dark));
+            border: 5px solid var(--building-dark);
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        .pixel-window::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--building-dark);
+            transform: translateY(-50%);
+        }
+
+        .pixel-window::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 5px;
+            background: var(--building-dark);
+            transform: translateX(-50%);
+        }
+
+        .pixel-window.lit {
+            background: linear-gradient(to bottom, #ffeaa7, #fdcb6e);
+            animation: windowGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes windowGlow {
+            0%, 100% { box-shadow: inset 0 0 15px rgba(0,0,0,0.2), 0 0 10px rgba(255,234,167,0.3); }
+            50% { box-shadow: inset 0 0 15px rgba(0,0,0,0.2), 0 0 20px rgba(255,234,167,0.5); }
+        }
+
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: repeating-linear-gradient(90deg, var(--floor) 0px, var(--floor) 70px, var(--floor-dark) 70px, var(--floor-dark) 140px);
+        }
+
+        .floor-shadow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: rgba(0,0,0,0.15);
+        }
+
+        .workstations {
+            position: absolute;
+            bottom: 100px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 50px;
+        }
+
+        .workstation {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .monitor {
+            width: 60px;
+            height: 48px;
+            background: #1a1a2e;
+            border: 4px solid #3d3d5c;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .monitor-screen {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            color: #00ff00;
+            padding: 2px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        .monitor.typing .monitor-screen { animation: screenBlink 0.5s infinite; }
+
+        @keyframes screenBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .monitor-stand { width: 12px; height: 8px; background: #3d3d5c; }
+        .monitor-base { width: 35px; height: 4px; background: #4a4a6a; border-radius: 2px; }
+        .keyboard { width: 45px; height: 12px; background: linear-gradient(to bottom, #4a4a6a, #3d3d5c); border: 2px solid #2d2d44; border-radius: 2px; margin-top: 5px; }
+        .chair { width: 30px; height: 20px; background: #e74c3c; border-radius: 0 0 6px 6px; position: relative; margin-top: -3px; }
+        .chair-back { position: absolute; bottom: 100%; left: 0; width: 30px; height: 25px; background: #c0392b; border-radius: 6px 6px 0 0; }
+
+        .character {
+            position: absolute;
+            bottom: 110px;
+            width: 28px;
+            height: 42px;
+            animation: charIdle 0.6s steps(2) infinite;
+            z-index: 10;
+            transition: left 2s ease-in-out;
+        }
+
+        @keyframes charIdle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+
+        .character.walking { animation: charWalk 0.25s steps(2) infinite; }
+
+        @keyframes charWalk {
+            0% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-4px) rotate(3deg); }
+            100% { transform: translateY(0) rotate(-3deg); }
+        }
+
+        .char-head {
+            width: 18px;
+            height: 18px;
+            background: #ffd5b5;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            border: 2px solid #e0b090;
+        }
+
+        .char-eyes {
+            position: absolute;
+            top: 5px;
+            left: 3px;
+            width: 3px;
+            height: 3px;
+            background: #2d2d44;
+            border-radius: 50%;
+            box-shadow: 7px 0 0 #2d2d44;
+        }
+
+        .char-mouth {
+            position: absolute;
+            bottom: 3px;
+            left: 5px;
+            width: 5px;
+            height: 2px;
+            background: #c0392b;
+            border-radius: 0 0 2px 2px;
+        }
+
+        .char-hair {
+            position: absolute;
+            top: -5px;
+            left: -1px;
+            width: 20px;
+            height: 11px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .char-body {
+            width: 20px;
+            height: 15px;
+            margin: 2px auto 0;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .char-arm {
+            position: absolute;
+            top: 1px;
+            width: 5px;
+            height: 12px;
+            background: inherit;
+            border-radius: 2px;
+        }
+
+        .char-arm.left { left: -3px; }
+        .char-arm.right { right: -3px; }
+
+        .char-legs { display: flex; justify-content: center; gap: 3px; }
+        .char-leg { width: 7px; height: 10px; background: #2c3e50; border-radius: 0 0 2px 2px; }
+
+        .char-frontend .char-hair { background: #e74c3c; }
+        .char-frontend .char-body, .char-frontend .char-arm { background: #3498db; }
+
+        .char-backend .char-hair { background: #27ae60; }
+        .char-backend .char-body, .char-backend .char-arm { background: #27ae60; }
+
+        .char-data .char-hair { background: #9b59b6; }
+        .char-data .char-body, .char-data .char-arm { background: #9b59b6; }
+
+        .char-devops .char-hair { background: #f39c12; }
+        .char-devops .char-body, .char-devops .char-arm { background: #f39c12; }
+
+        .char-qa .char-hair { background: #1abc9c; }
+        .char-qa .char-body, .char-qa .char-arm { background: #1abc9c; }
+
+        .char-ai .char-hair { background: #e91e63; }
+        .char-ai .char-body, .char-ai .char-arm { background: #e91e63; }
+
+        .char-secops .char-hair { background: #607d8b; }
+        .char-secops .char-body, .char-secops .char-arm { background: #607d8b; }
+
+        .char-label {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 8px;
+            white-space: nowrap;
+            border: 2px solid;
+        }
+
+        .char-label.online { border-color: #2ecc71; }
+        .char-label.busy { border-color: #e74c3c; }
+        .char-label.away { border-color: #f39c12; }
+
+        .label-dot {
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            margin-right: 3px;
+        }
+
+        .label-dot.online { background: #2ecc71; box-shadow: 0 0 4px #2ecc71; }
+        .label-dot.busy { background: #e74c3c; box-shadow: 0 0 4px #e74c3c; animation: dotPulse 1s infinite; }
+        .label-dot.away { background: #f39c12; }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .chat-bubble {
+            position: absolute;
+            background: white;
+            padding: 5px 9px;
+            border-radius: 10px;
+            font-size: 9px;
+            color: #2d2d44;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease-out;
+            z-index: 20;
+            max-width: 100px;
+        }
+
+        .chat-bubble.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -7px;
+            left: 12px;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 8px solid white;
+        }
+
+        .leaf {
+            position: absolute;
+            font-size: 16px;
+            animation: leafFall 8s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes leafFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(560px) rotate(360deg); opacity: 0; }
+        }
+
+        .game-ui {
+            width: 960px;
+            margin-top: 15px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .ui-panel {
+            background: linear-gradient(to bottom, #3d3d5c, #2d2d44);
+            border: 4px solid #4a3728;
+            border-radius: 8px;
+            box-shadow: inset 3px 3px 0 #5a5a7a, inset -3px -3px 0 #1a1a2e;
+        }
+
+        .ui-title {
+            background: linear-gradient(to bottom, #6b5344, #4a3728);
+            padding: 5px 10px;
+            border-bottom: 3px solid #3d2817;
+            color: #ffd93d;
+            font-size: 11px;
+            text-shadow: 2px 2px 0 #000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ui-content { padding: 10px; }
+
+        .minimap {
+            width: 130px;
+            height: 85px;
+            background: #1a1a2e;
+            border: 3px solid #4a3728;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .minimap-player {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #ffd93d;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #ffd93d;
+            animation: minimapPulse 1s infinite;
+        }
+
+        @keyframes minimapPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .status-panel { flex: 1; }
+        .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .status-icon { font-size: 14px; }
+        .status-text { font-size: 10px; color: #ecf0f1; }
+
+        .stat-bar { width: 70px; height: 8px; background: #1a1a2e; border: 2px solid #4a3728; border-radius: 2px; overflow: hidden; }
+        .stat-fill { height: 100%; transition: width 0.5s; }
+        .stat-fill.hp { background: linear-gradient(to bottom, #e74c3c, #c0392b); }
+        .stat-fill.mp { background: linear-gradient(to bottom, #3498db, #2980b9); }
+
+        .dialogue-panel { width: 350px; }
+        .dialogue-name { color: #ffd93d; font-weight: bold; margin-bottom: 4px; font-size: 11px; }
+        .dialogue-text { color: #ecf0f1; font-size: 10px; line-height: 1.5; }
+
+        .time-panel { width: 100px; text-align: center; }
+        .time-value { font-size: 22px; color: #ffd93d; text-shadow: 2px 2px 0 #000; }
+        .time-label { font-size: 9px; color: #95a5a6; }
+
+        .team-panel .ui-content { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        .team-member-mini { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .team-avatar-mini { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid; }
+        .team-avatar-mini.online { border-color: #2ecc71; }
+        .team-avatar-mini.busy { border-color: #e74c3c; }
+        .team-avatar-mini.away { border-color: #f39c12; }
+        .team-name-mini { font-size: 7px; color: #95a5a6; }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <div class="sky">
+            <div class="sun"></div>
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            <div class="cloud cloud-3"></div>
+        </div>
+
+        <div class="mountains">
+            <div class="mountain mountain-1"></div>
+            <div class="mountain mountain-2"></div>
+            <div class="mountain mountain-3"></div>
+            <div class="mountain mountain-4"></div>
+            <div class="mountain mountain-5"></div>
+        </div>
+
+        <div class="building-main">
+            <div class="roof"></div>
+            
+            <div class="window-row window-row-1">
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window"></div>
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window"></div>
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window"></div>
+            </div>
+            <div class="window-row window-row-2">
+                <div class="pixel-window"></div>
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window"></div>
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window"></div>
+                <div class="pixel-window lit"></div>
+            </div>
+            <div class="window-row window-row-3">
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window"></div>
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window lit"></div>
+                <div class="pixel-window"></div>
+            </div>
+
+            <div class="workstations">
+                <div class="workstation">
+                    <div class="monitor typing"><div class="monitor-screen">Frontend@code~</div></div>
+                    <div class="monitor-stand"></div><div class="monitor-base"></div>
+                    <div class="keyboard"></div>
+                    <div class="chair-back"></div><div class="chair"></div>
+                </div>
+                <div class="workstation">
+                    <div class="monitor"><div class="monitor-screen">Backend@debug</div></div>
+                    <div class="monitor-stand"></div><div class="monitor-base"></div>
+                    <div class="keyboard"></div>
+                    <div class="chair-back"></div><div class="chair"></div>
+                </div>
+                <div class="workstation">
+                    <div class="monitor typing"><div class="monitor-screen">Data@ML_AI</div></div>
+                    <div class="monitor-stand"></div><div class="monitor-base"></div>
+                    <div class="keyboard"></div>
+                    <div class="chair-back"></div><div class="chair"></div>
+                </div>
+                <div class="workstation">
+                    <div class="monitor"><div class="monitor-screen">DevOps@CI</div></div>
+                    <div class="monitor-stand"></div><div class="monitor-base"></div>
+                    <div class="keyboard"></div>
+                    <div class="chair-back"></div><div class="chair"></div>
+                </div>
+                <div class="workstation">
+                    <div class="monitor typing"><div class="monitor-screen">QA@Testing</div></div>
+                    <div class="monitor-stand"></div><div class="monitor-base"></div>
+                    <div class="keyboard"></div>
+                    <div class="chair-back"></div><div class="chair"></div>
+                </div>
+                <div class="workstation">
+                    <div class="monitor"><div class="monitor-screen">AI@Train</div></div>
+                    <div class="monitor-stand"></div><div class="monitor-base"></div>
+                    <div class="keyboard"></div>
+                    <div class="chair-back"></div><div class="chair"></div>
+                </div>
+                <div class="workstation">
+                    <div class="monitor"><div class="monitor-screen">SecOps@Mon</div></div>
+                    <div class="monitor-stand"></div><div class="monitor-base"></div>
+                    <div class="keyboard"></div>
+                    <div class="chair-back"></div><div class="chair"></div>
+                </div>
+            </div>
+
+            <div class="floor"><div class="floor-shadow"></div></div>
+        </div>
+
+        <!-- 角色 -->
+        <div class="character char-frontend" id="char-frontend" style="left: 60px;">
+            <div class="char-label online"><span class="label-dot online"></span>Frontend</div>
+            <div class="char-head"><div class="char-hair"></div><div class="char-eyes"></div><div class="char-mouth"></div></div>
+            <div class="char-body"><div class="char-arm left"></div><div class="char-arm right"></div></div>
+            <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+        </div>
+
+        <div class="character char-backend" id="char-backend" style="left: 185px;">
+            <div class="char-label busy"><span class="label-dot busy"></span>Backend</div>
+            <div class="char-head"><div class="char-hair"></div><div class="char-eyes"></div><div class="char-mouth"></div></div>
+            <div class="char-body"><div class="char-arm left"></div><div class="char-arm right"></div></div>
+            <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+        </div>
+
+        <div class="character char-data" id="char-data" style="left: 310px;">
+            <div class="char-label online"><span class="label-dot online"></span>Data</div>
+            <div class="char-head"><div class="char-hair"></div><div class="char-eyes"></div><div class="char-mouth"></div></div>
+            <div class="char-body"><div class="char-arm left"></div><div class="char-arm right"></div></div>
+            <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+        </div>
+
+        <div class="character char-devops" id="char-devops" style="left: 435px;">
+            <div class="char-label online"><span class="label-dot online"></span>DevOps</div>
+            <div class="char-head"><div class="char-hair"></div><div class="char-eyes"></div><div class="char-mouth"></div></div>
+            <div class="char-body"><div class="char-arm left"></div><div class="char-arm right"></div></div>
+            <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+        </div>
+
+        <div class="character char-qa" id="char-qa" style="left: 560px;">
+            <div class="char-label busy"><span class="label-dot busy"></span>QA</div>
+            <div class="char-head"><div class="char-hair"></div><div class="char-eyes"></div><div class="char-mouth"></div></div>
+            <div class="char-body"><div class="char-arm left"></div><div class="char-arm right"></div></div>
+            <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+        </div>
+
+        <div class="character char-ai" id="char-ai" style="left: 685px;">
+            <div class="char-label online"><span class="label-dot online"></span>AI Eng</div>
+            <div class="char-head"><div class="char-hair"></div><div class="char-eyes"></div><div class="char-mouth"></div></div>
+            <div class="char-body"><div class="char-arm left"></div><div class="char-arm right"></div></div>
+            <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+        </div>
+
+        <div class="character char-secops" id="char-secops" style="left: 810px;">
+            <div class="char-label away"><span class="label-dot away"></span>SecOps</div>
+            <div class="char-head"><div class="char-hair"></div><div class="char-eyes"></div><div class="char-mouth"></div></div>
+            <div class="char-body"><div class="char-arm left"></div><div class="char-arm right"></div></div>
+            <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
+        </div>
+
+        <!-- 聊天泡泡 -->
+        <div class="chat-bubble" id="bubble-frontend" style="bottom: 200px; left: 50px;">有新任務！</div>
+        <div class="chat-bubble" id="bubble-backend" style="bottom: 200px; left: 175px;">API 好了？</div>
+        <div class="chat-bubble" id="bubble-data" style="bottom: 200px; left: 300px;">訓練中...</div>
+
+        <!-- 漂浮楓葉 -->
+        <div class="leaf" style="left: 100px; animation-delay: 0s;">&#x1F341;</div>
+        <div class="leaf" style="left: 300px; animation-delay: 2s;">&#x1F341;</div>
+        <div class="leaf" style="left: 500px; animation-delay: 4s;">&#x1F341;</div>
+        <div class="leaf" style="left: 700px; animation-delay: 6s;">&#x1F341;</div>
+        <div class="leaf" style="left: 850px; animation-delay: 1s;">&#x1F341;</div>
+    </div>
+
+    <div class="game-ui">
+        <div class="ui-panel">
+            <div class="ui-title">&#x1F5FA; 地圖</div>
+            <div class="ui-content">
+                <div class="minimap">
+                    <div class="minimap-player" style="top: 50%; left: 50%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-panel status-panel">
+            <div class="ui-title">&#x1F4CA; 狀態</div>
+            <div class="ui-content">
+                <div class="status-row">
+                    <span class="status-icon">&#x2764;&#xFE0F;</span>
+                    <span class="status-text">HP</span>
+                    <div class="stat-bar"><div class="stat-fill hp" style="width: 85%;"></div></div>
+                </div>
+                <div class="status-row">
+                    <span class="status-icon">&#x1F4A7;</span>
+                    <span class="status-text">MP</span>
+                    <div class="stat-bar"><div class="stat-fill mp" style="width: 60%;"></div></div>
+                </div>
+                <div class="status-row">
+                    <span class="status-icon">&#x2B50;</span>
+                    <span class="status-text">經驗</span>
+                    <div class="stat-bar"><div class="stat-fill hp" style="width: 45%; background: linear-gradient(to bottom, #f39c12, #d68910);"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-panel dialogue-panel">
+            <div class="ui-title">&#x1F4AC; 對話</div>
+            <div class="ui-content">
+                <div class="dialogue-name">Frontend：</div>
+                <div class="dialogue-text">新頁面完成！需要 QA 測試</div>
+            </div>
+        </div>
+
+        <div class="ui-panel time-panel">
+            <div class="ui-title">&#x23F0; 時間</div>
+            <div class="ui-content">
+                <div class="time-value" id="clock">00:00</div>
+                <div class="time-label" id="dateLabel">2026-03-23</div>
+            </div>
+        </div>
+
+        <div class="ui-panel team-panel">
+            <div class="ui-title">&#x1F465; 團隊</div>
+            <div class="ui-content">
+                <div class="team-member-mini">
+                    <div class="team-avatar-mini online">&#x1F468;&#x200D;&#x1F4BB;</div>
+                    <div class="team-name-mini">Frontend</div>
+                </div>
+                <div class="team-member-mini">
+                    <div class="team-avatar-mini busy">&#x1F468;&#x200D;&#x1F527;</div>
+                    <div class="team-name-mini">Backend</div>
+                </div>
+                <div class="team-member-mini">
+                    <div class="team-avatar-mini online">&#x1F469;&#x200D;&#x1F52C;</div>
+                    <div class="team-name-mini">Data</div>
+                </div>
+                <div class="team-member-mini">
+                    <div class="team-avatar-mini online">&#x1F468;&#x200D;&#x1F3ED;</div>
+                    <div class="team-name-mini">DevOps</div>
+                </div>
+                <div class="team-member-mini">
+                    <div class="team-avatar-mini busy">&#x1F50D;</div>
+                    <div class="team-name-mini">QA</div>
+                </div>
+                <div class="team-member-mini">
+                    <div class="team-avatar-mini online">&#x1F916;</div>
+                    <div class="team-name-mini">AI</div>
+                </div>
+                <div class="team-member-mini">
+                    <div class="team-avatar-mini away">&#x1F6E1;</div>
+                    <div class="team-name-mini">SecOps</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('zh-TW', { hour12: false });
+            const date = now.toLocaleDateString('zh-TW');
+            document.getElementById('clock').textContent = time;
+            document.getElementById('dateLabel').textContent            document.getElementById('clock').textContent = time;
+            document.getElementById('dateLabel').textContent = date;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 聊天泡泡動畫
+        const bubbles = ['bubble-frontend', 'bubble-backend', 'bubble-data'];
+        let bubbleIndex = 0;
+
+        function showBubble() {
+            bubbles.forEach(id => {
+                document.getElementById(id).classList.remove('show');
+            });
+            document.getElementById(bubbles[bubbleIndex]).classList.add('show');
+            bubbleIndex = (bubbleIndex + 1) % bubbles.length;
+        }
+
+        setInterval(showBubble, 3000);
+        showBubble();
+
+        // 角色移動動畫
+        const chars = ['char-frontend', 'char-backend', 'char-data'];
+        const positions = [
+            [60, 400],
+            [185, 550],
+            [310, 200]
+        ];
+        let charIndex = 0;
+
+        function moveCharacter() {
+            chars.forEach(id => {
+                document.getElementById(id).classList.add('walking');
+            });
+
+            setTimeout(() => {
+                chars.forEach((id, i) => {
+                    document.getElementById(id).style.left = positions[i][0] + 'px';
+                });
+            }, 500);
+
+            setTimeout(() => {
+                chars.forEach(id => {
+                    document.getElementById(id).classList.remove('walking');
+                });
+            }, 2500);
+        }
+
+        setInterval(moveCharacter, 8000);
+
+        // 鍵盤打字效果
+        const screens = document.querySelectorAll('.monitor-screen');
+        screens.forEach(screen => {
+            const original = screen.textContent;
+            let charIndex = 0;
+            setInterval(() => {
+                charIndex = (charIndex + 1) % (original.length + 3);
+                if (charIndex <= original.length) {
+                    screen.textContent = original.substring(0, charIndex) + '_';
+                } else {
+                    screen.textContent = original + '...';
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>

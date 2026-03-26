@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍁 虛擬辦公室 - 16-bit RPG 風格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: pixelated;
+        }
+
+        :root {
+            --bg-dark: #1a1a2e;
+            --bg-panel: #2d2d44;
+            --border-dark: #4a3728;
+            --border-light: #8b7355;
+            --accent-yellow: #ffd93d;
+            --accent-red: #e74c3c;
+            --accent-blue: #3498db;
+            --accent-green: #2ecc71;
+            --accent-purple: #9b59b6;
+            --accent-orange: #f39c12;
+            --accent-cyan: #1abc9c;
+            --text-light: #ecf0f1;
+            --text-dim: #95a5a6;
+            --shadow: rgba(0,0,0,0.5);
+        }
+
+        body {
+            background: var(--bg-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            color: var(--text-light);
+        }
+
+        /* === 標題區 === */
+        .header {
+            background: linear-gradient(to bottom, #4a3728, #3d2817);
+            border: 4px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 
+                inset 2px 2px 0 var(--border-light),
+                inset -2px -2px 0 #2a1a10,
+                0 4px 0 #1a1a2e;
+        }
+
+        .header h1 {
+            color: var(--accent-yellow);
+            font-size: 28px;
+            text-shadow: 
+                3px 3px 0 #c4a000,
+                -1px -1px 0 #fff5;
+            letter-spacing: 2px;
+        }
+
+        .header .subtitle {
+            color: var(--text-dim);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* === 主容器 === */
+        .main-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* === RPG 視窗邊框 === */
+        .rpg-window {
+            background: linear-gradient(to bottom, #3d3d5c, #2d2d44);
+            border: 4px solid var(--border-dark);
+            border-radius: 8px;
+            box-shadow: 
+                inset 3px 3px 0 #5a5a7a,
+                inset -3px -3px 0 #1a1a2e,
+                0 6px 0 #1a1a2e;
+            overflow: hidden;
+        }
+
+        .window-title {
+            background: linear-gradient(to bottom, #6b5344, #4a3728);
+            padding: 8px 15px;
+            border-bottom: 3px solid var(--border-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .window-title h3 {
+            color: var(--accent-yellow);
+            font-size: 14px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .title-buttons {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+        }
+
+        .title-btn {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--border-dark);
+        }
+
+        .title-btn.minimize { background: #f1c40f; }
+        .title-btn.maximize { background: #2ecc71; }
+        .title-btn.close { background: #e74c3c; }
+
+        /* === 左側面板 - 導航 === */
+        .sidebar {
+            width: 200px;
+            flex-shrink: 0;
+        }
+
+        .nav-menu {
+            padding: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #3d3d5c, #2d2d44);
+            border: 3px solid var(--border-dark);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-size: 13px;
+        }
+
+        .nav-item:hover {
+            background: linear-gradient(to right, #4a4a6a, #3d3d5c);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(to right, #4a3728, #3d2817);
+            border-color: var(--accent-yellow);
+            box-shadow: 
+                inset 2px 2px 0 var(--border-light),
+                0 0 10px rgba(255,217,61,0.3);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        /* === 中央區域 - 主要內容 === */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* === Bot 狀態卡片 === */
+        .bot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .bot-card {
+            background: linear-gradient(to bottom, #4a4a6a, #3d3d5c);
+            border: 3px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 
+                inset 2px 2px 0 #5a5a7a,
+                inset -2px -2px 0 #2d2d44;
+        }
+
+        .bot-avatar {
+            width: 60px;
+            height: 60px;
+            background: #2d2d44;
+            border: 3px solid var(--border-dark);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: inset 2px 2px 0 var(--shadow);
+        }
+
+        .bot-info {
+            flex: 1;
+        }
+
+        .bot-name {
+            color: var(--accent-yellow);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 5px;
+        }
+
+        .bot-role {
+            color: var(--text-dim);
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .bot-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--border-dark);
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online { 
+            background: var(--accent-green); 
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+        .status-indicator.busy { 
+            background: var(--accent-red); 
+            box-shadow: 0 0 8px var(--accent-red);
+        }
+        .status-indicator.away { 
+            background: var(--accent-orange); 
+            box-shadow: 0 0 8px var(--accent-orange);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* === RPG 按鈕 === */
+        .rpg-btn {
+            background: linear-gradient(to bottom, #4a90a4, #357a8a);
+            border: 3px solid #2d6a7a;
+            border-radius: 5px;
+            padding: 10px 20px;
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 
+                inset 2px 2px 0 #5aa0b4,
+                inset -2px -2px 0 #257a8a,
+                0 4px 0 #1a5a6a;
+            transition: all 0.1s;
+        }
+
+        .rpg-btn:hover {
+            background: linear-gradient(to bottom, #5aa0b4, #458a9a);
+            transform: translateY(-2px);
+        }
+
+        .rpg-btn:active {
+            transform: translateY(2px);
+            box-shadow: 
+                inset 2px 2px 0 #257a8a,
+                inset -2px -2px 0 #5aa0b4,
+                0 2px 0 #1a5a6a;
+        }
+
+        .rpg-btn.primary {
+            background: linear-gradient(to bottom, #e74c3c, #c0392b);
+            border-color: #a02a1b;
+            box-shadow: 
+                inset 2px 2px 0 #f75c4c,
+                inset -2px -2px 0 #a02a1b,
+                0 4px 0 #801a0b;
+        }
+
+        .rpg-btn.success {
+            background: linear-gradient(to bottom, #2ecc71, #27ae60);
+            border-color: #1e8a4a;
+            box-shadow: 
+                inset 2px 2px 0 #3ecc81,
+                inset -2px -2px 0 #1e8a4a,
+                0 4px 0 #0e6a3a;
+        }
+
+        /* === 進度條 === */
+        .progress-bar {
+            background: #1a1a2e;
+            border: 2px solid var(--border-dark);
+            border-radius: 3px;
+            height: 16px;
+            overflow: hidden;
+            box-shadow: inset 2px 2px 0 var(--shadow);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to bottom, #2ecc71, #27ae60);
+            border-radius: 2px;
+            transition: width 0.3s;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
+        }
+
+        .progress-fill.warning {
+            background: linear-gradient(to bottom, #f39c12, #d68910);
+        }
+
+        .progress-fill.danger {
+            background: linear-gradient(to bottom, #e74c3c, #c0392b);
+        }
+
+        /* === 對話框 === */
+        .dialogue-box {
+            background: linear-gradient(to bottom, #2d2d44, #1a1a2e);
+            border: 4px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+            box-shadow: 
+                inset 3px 3px 0 #4d4d64,
+                inset -3px -3px 0 #1a1a2e;
+        }
+
+        .dialogue-portrait {
+            position: absolute;
+            left: -30px;
+            top: -30px;
+            width: 60px;
+            height: 60px;
+            background: #4a3728;
+            border: 3px solid var(--border-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 0 10px var(--shadow);
+        }
+
+        .dialogue-text {
+            color: var(--text-light);
+            font-size: 13px;
+            line-height: 1.6;
+            padding-left: 20px;
+        }
+
+        .dialogue-name {
+            color: var(--accent-yellow);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* === 統計面板 === */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(to bottom, #3d3d5c, #2d2d44);
+            border: 3px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: inset 2px 2px 0 #4d4d64;
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: var(--accent-yellow);
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        /* === 聊天區域 === */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            animation: messageIn 0.3s ease-out;
+        }
+
+        @keyframes messageIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            background: #4a3728;
+            border: 2px solid var(--border-dark);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .chat-bubble {
+            background: #3d3d5c;
+            border: 2px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 8px 12px;
+            max-width: 300px;
+            position: relative;
+        }
+
+        .chat-bubble.self {
+            background: #357a8a;
+            margin-left: auto;
+        }
+
+        .chat-sender {
+            color: var(--accent-cyan);
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .chat-bubble.self .chat-sender {
+            color: var(--accent-yellow);
+        }
+
+        .chat-content {
+            color: var(--text-light);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .chat-time {
+            color: var(--text-dim);
+            font-size: 9px;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            border-top: 3px solid var(--border-dark);
+            background: #2d2d44;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 3px solid var(--border-dark);
+            border-radius: 5px;
+            padding: 10px 15px;
+            color: var(--text-light);
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(52,152,219,0.3);
+        }
+
+        /* === 圖示區 === */
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 8px;
+            background: linear-gradient(to bottom, #3d3d5c, #2d2d44);
+            border: 3px solid var(--border-dark);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .icon-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px var(--shadow);
+            border-color: var(--accent-yellow);
+        }
+
+        .icon-item .icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .icon-item .label {
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        /* === 底部狀態列 === */
+        .status-bar-bottom {
+            width: 100%;
+            max-width: 1200px;
+            background: linear-gradient(to bottom, #4a3728, #3d2817);
+            border: 4px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 
+                inset 2px 2px 0 var(--border-light),
+                inset -2px -2px 0 #2a1a10;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .online-count {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .time-display {
+            color: var(--accent-yellow);
+            font-size: 14px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* === 響應式 === */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                gap: 10px;
+            }
+            .nav-item {
+                flex-shrink: 0;
+                margin-bottom: 0;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 標題 -->
+    <div class="header">
+        <h1>🍁 虛擬辦公室</h1>
+        <div class="subtitle">16-BIT RPG 風格工作系統 v1.0</div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 左側導航 -->
+        <div class="sidebar rpg-window">
+            <div class="window-title">
+                <span>📁</span>
+                <h3>功能表</h3>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="selectNav(this)">
+                    <span class="nav-icon">🏠</span>
+                    <span>首頁</span>
+                </div>
+                <div class="nav-item" onclick="selectNav(this)">
+                    <span class="nav-icon">💬</span>
+                    <span>聊天室</span>
+                </div>
+                <div class="nav-item" onclick="selectNav(this)">
+                    <span class="nav-icon">📊</span>
+                    <span>工作狀態</span>
+                </div>
+                <div class="nav-item" onclick="selectNav(this)">
+                    <span class="nav-icon">📅</span>
+                    <span>日程</span>
+                </div>
+                <div class="nav-item" onclick="selectNav(this)">
+                    <span class="nav-icon">📧</span>
+                    <span>郵件</span>
+                </div>
+                <div class="nav-item" onclick="selectNav(this)">
+                    <span class="nav-icon">📁</span>
+                    <span>檔案</span>
+                </div>
+                <div class="nav-item" onclick="selectNav(this)">
+                    <span class="nav-icon">⚙️</span>
+                    <span>設定</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中央內容 -->
+        <div class="content-area">
+            <!-- 統計面板 -->
+            <div class="rpg-window">
+                <div class="window-title">
+                    <span>📈</span>
+                    <h3>辦公室概覽</h3>
+                    <div class="title-buttons">
+                        <div class="title-btn minimize"></div>
+                        <div class="title-btn maximize"></div>
+                        <div class="title-btn close"></div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value">7</div>
+                        <div class="stat-label">在線工程師</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">進行中任務</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-value">28</div>
+                        <div class="stat-label">未讀訊息</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-value">99%</div>
+                        <div class="stat-label">系統負載</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bot 狀態 -->
+            <div class="rpg-window">
+                <div class="window-title">
+                    <span>🤖</span>
+                    <h3>工程師狀態</h3>
+                    <div class="title-buttons">
+                        <div class="title-btn minimize"></div>
+                        <div class="title-btn maximize"></div>
+                        <div class="title-btn close"></div>
+                    </div>
+                </div>
+                <div class="bot-grid">
+                    <!-- Frontend -->
+                    <div class="bot-card">
+                        <div class="bot-avatar">👨‍💻</div>
+                        <div class="bot-info">
+                            <div class="bot-name">Frontend</div>
+                            <div class="bot-role">前端工程師 | React / CSS</div>
+                            <div class="bot-status">
+                                <div class="status-indicator online"></div>
+                                <span>線上 - 開發中</span>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 65%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backend -->
+                    <div class="bot-card">
+                        <div class="bot-avatar">👨‍🔧</div>
+                        <div class="bot-info">
+                            <div class="bot-name">Backend</div>
+                            <div class="bot-role">後端工程師 | API / DB</div>
+                            <div class="bot-status">
+                                <div class="status-indicator busy"></div>
+                                <span>忙碌 - 除錯中</span>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill warning" style="width: 80%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data -->
+                    <div class="bot-card">
+                        <div class="bot-avatar">👩‍🔬</div>
+                        <div class="bot-info">
+                            <div class="bot-name">Data</div>
+                            <div class="bot-role">資料工程師 | ML / Analytics</div>
+                            <div class="bot-status">
+                                <div class="status-indicator online"></div>
+                                <span>線上 - 分析中</span>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 45%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DevOps -->
+                    <div class="bot-card">
+                        <div class="bot-avatar">👨‍🏭</div>
+                        <div class="bot-info">
+                            <div class="bot-name">DevOps</div>
+                            <div class="bot-role">DevOps 工程師 | CI/CD</div>
+                            <div class="bot-status">
+                                <div class="status-indicator online"></div>
+                                <span>線上 - 部署監控</span>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 30%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- QA -->
+                    <div class="bot-card">
+                        <div class="bot-avatar">🔍</div>
+                        <div class="bot-info">
+                            <div class="bot-name">QA</div>
+                            <div class="bot-role">測試工程師 | 品質把關</div>
+                            <div class="bot-status">
+                                <div class="status-indicator busy"></div>
+                                <span>忙碌 - 測試中</span>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill danger" style="width: 90%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Engineer -->
+                    <div class="bot-card">
+                        <div class="bot-avatar">🤖</div>
+                        <div class="bot-info">
+                            <div class="bot-name">AI Engineer</div>
+                            <div class="bot-role">AI 工程師 | Model Training</div>
+                            <div class="bot-status">
+                                <div class="status-indicator online"></div>
+                                <span>線上 - 訓練中</span>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 55%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SecOps -->
+                    <div class="bot-card">
+                        <div class="bot-avatar">🛡️</div>
+                        <div class="bot-info">
+                            <div class="bot-name">SecOps</div>
+                            <div class="bot-role">安全工程師 | 資安監控</div>
+                            <div class="bot-status">
+                                <div class="status-indicator away"></div>
+                                <span>離開 - 休息中</span>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快捷圖示 -->
+            <div class="rpg-window">
+                <div class="window-title">
+                    <span>⭐</span>
+                    <h3>快捷功能</h3>
+                </div>
+                <div class="icons-grid">
+                    <div class="icon-item">
+                        <span class="icon">📁</span>
+                        <span class="label">我的檔案</span>
+                    </div>
+                    <div class="icon-item">
+                        <span class="icon">📧</span>
+                        <span class="label">收件匣</span>
+                    </div>
+                    <div class="icon-item">
+                        <span class="icon">📅</span>
+                        <span class="label">日程表</span>
+                    </div>
+                    <div class="icon-item">
+                        <span class="icon">📊</span>
+                        <span class="label">報表</span>
+                    </div>
+                    <div class="icon-item">
+                        <span class="icon">⚙️</span>
+                        <span class="label">設定</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 對話框 -->
+            <div class="dialogue-box" style="margin-top: 20px;">
+                <div class="dialogue-portrait">👨‍💻</div>
+                <div class="dialogue-text">
+                    <div class="dialogue-name">Frontend 說：</div>
+                    嗨！歡迎來到虛擬辦公室！點擊左側功能表探索更多，或點擊上方的 Bot 卡片查看他們的即時狀態。如果有任何問題，隨時問我！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部狀態列 -->
+    <div class="status-bar-bottom">
+        <div class="status-left">
+            <div class="status-item">
+                <span>🍁</span>
+                <span>MapleOffice v1.0</span>
+            </div>
+            <div class="status-item">
+                <span>👥</span>
+                <span class="online-count">7 在線</span>
+            </div>
+            <div class="status-item">
+                <span>📋</span>
+                <span>3 個任務進行中</span>
+            </div>
+        </div>
+        <div class="status-right">
+            <div class="time-display" id="clock">00:00:00</div>
+        </div>
+    </div>
+
+    <script>
+        // 時鐘更新
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('zh-TW', { hour12: false });
+            document.getElementById('clock').textContent = time;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 導航選中
+        function selectNav(el) {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            el.classList.add('active');
+        }
+
+        // 隨機更新狀態
+        const statuses = [
+            { text: '線上 - 開發中', class: 'online' },
+            { text: '忙碌 - 除錯中', class: 'busy' },
+            { text: '線上 - 分析中', class: 'online' },
+            { text: '離開 - 休息中', class: 'away' }
+        ];
+
+        // 動畫效果
+        document.querySelectorAll('.bot-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'scale(1.02)';
+                card.style.boxShadow = '0 0 20px rgba(255,217,61,0.3)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'scale(1)';
+                card.style.boxShadow = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

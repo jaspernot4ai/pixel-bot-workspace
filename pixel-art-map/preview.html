@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Art UI Preview</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0a0f;
+      color: #fff;
+      padding: 20px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .preview-card {
+      border: 3px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #111;
+    }
+    
+    .preview-card.neon {
+      border-color: #ff00ff;
+      box-shadow: 0 0 20px #ff00ff44;
+    }
+    
+    .preview-card.neon h2 {
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff;
+    }
+    
+    .preview-card.retro {
+      border-color: #00ff00;
+      box-shadow: 0 0 20px #00ff0044;
+    }
+    
+    .preview-card.retro h2 {
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
+    }
+    
+    .preview-card.jrpg {
+      border-color: #ffcc00;
+      box-shadow: 0 0 20px #ffcc0044;
+    }
+    
+    .preview-card.jrpg h2 {
+      color: #ffcc00;
+      text-shadow: 0 0 10px #ffcc00;
+    }
+    
+    .preview-content {
+      height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .bot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .bot-icon {
+      width: 32px;
+      height: 32px;
+      border: 2px solid #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    
+    .bot-icon.idle { background: #22c55e33; border-color: #22c55e; }
+      background: #3b82f633; border-color: #3b82f6; }
+      background: #ef444433; border-color: #ef4444; }
+    }
+    
+    .pixel-text {
+      font-size: 12px;
+      color: #888;
+      margin-top: 10px;
+    }
+    
+    .chat-bubble {
+      background: #222;
+      border: 2px solid #444;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 10px;
+      margin-top: 10px;
+      animation: blink 1s infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .status-bar {
+      width: 100%;
+      height: 8px;
+      background: #222;
+      margin-top: 10px;
+      position: relative;
+    }
+    
+    .status-bar::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 75%;
+      background: linear-gradient(90deg, #22c55e, #3b82f6);
+    }
+    
+    .terminal-line {
+      color: #00ff00;
+      font-size: 10px;
+      margin: 2px 0;
+    }
+    
+    .terminal-line::before {
+      content: '> ';
+      color: #006600;
+    }
+    
+    .jrpg-window {
+      background: #1a1a2e;
+      border: 4px solid #4a4a6a;
+      border-radius: 0;
+      padding: 15px;
+      width: 200px;
+      box-shadow: 
+        inset 2px 2px 0 #6a6a8a,
+        inset -2px -2px 0 #2a2a4a;
+    }
+    
+    .jrpg-title {
+      background: #4a4a6a;
+      color: #fff;
+      padding: 4px 8px;
+      margin: -15px -15px 10px -15px;
+      font-size: 10px;
+    }
+    
+    .jrpg-stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      margin: 4px 0;
+      color: #aaa;
+    }
+    
+    .jrpg-hp {
+      height: 6px;
+      background: #333;
+      margin-top: 4px;
+    }
+    
+    .jrpg-hp::after {
+      content: '';
+      display: block;
+      height: 100%;
+      width: 80%;
+      background: #22c55e;
+    }
+  </style>
+</head>
+<body>
+  <h1>⬡ PIXEL ART UI PREVIEW ⬡</h1>
+  
+  <div class="preview-grid">
+    <!-- Neon Pixel Style -->
+    <div class="preview-card neon">
+      <h2 style="padding: 10px; text-align: center;">◈ NEON PIXEL ◈</h2>
+      <div class="preview-content">
+        <div class="bot-grid">
+          <div class="bot-icon idle">●</div>
+          <div class="bot-icon" style="background: #3b82f633; border-color: #3b82f6;">●</div>
+          <div class="bot-icon" style="background: #ef444433; border-color: #ef4444;">●</div>
+          <div class="bot-icon idle">●</div>
+        </div>
+        <div class="pixel-text">STATUS: ONLINE</div>
+        <div class="chat-bubble" style="color: #ff00ff;">收到 ✅</div>
+      </div>
+    </div>
+    
+    <!-- Retro Terminal Style -->
+    <div class="preview-card retro">
+      <h2 style="padding: 10px; text-align: center;">◈ RETRO TERMINAL ◈</h2>
+      <div class="preview-content" style="background: #000; font-family: 'Courier New', monospace;">
+        <div style="text-align: left; width: 100%;">
+          <div class="terminal-line">BOT_01: IDLE</div>
+          <div class="terminal-line">BOT_02: WORKING</div>
+          <div class="terminal-line">BOT_03: BROADCAST</div>
+          <div class="terminal-line">BOT_04: IDLE</div>
+          <div class="terminal-line" style="color: #ffff00;">! ALERT: MSG_RECVD</div>
+          <div style="margin-top: 15px; color: #00ff00; font-size: 10px;">
+            > WEB SOCKET: CONNECTED<br>
+            > API: 200 OK<br>
+            > UPTIME: 01:23:45
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- JRPG Style -->
+    <div class="preview-card jrpg">
+      <h2 style="padding: 10px; text-align: center;">◈ JRPG WINDOW ◈</h2>
+      <div class="preview-content">
+        <div class="jrpg-window">
+          <div class="jrpg-title">◆ FRONTEND</div>
+          <div class="jrpg-stat"><span>LV</span><span>01</span></div>
+          <div class="jrpg-stat"><span>HP</span><span>██████░░</span></div>
+          <div class="jrpg-hp"></div>
+          <div class="jrpg-stat" style="margin-top: 10px;"><span>ROLE</span><span>UI/UX</span></div>
+          <div class="jrpg-stat"><span>STATUS</span><span>IDLE</span></div>
+          <div class="jrpg-stat"><span>TASK</span><span>NONE</span></div>
+        </div>
+        <div style="margin-top: 15px; color: #ffcc00; font-size: 10px;">
+          [ A ] MESSAGE  [ B ] TASK  [ X ] STATUS
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="text-align: center; margin-top: 30px; color: #666; font-size: 10px;">
+    Open this file in browser to see full preview | Pixel Art Map UI Demo
+  </div>
+</body>
+</html>

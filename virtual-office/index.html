@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍁 虛擬辦公室 - 楓之谷風格</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            image-rendering: pixelated;
+        }
+
+        h1 {
+            color: #ffd93d;
+            text-shadow: 3px 3px 0 #c4a000;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .office-container {
+            position: relative;
+            width: 900px;
+            height: 500px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 60%, #5a8f5a 60%, #4a7a4a 100%);
+            border: 4px solid #2d2d44;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        /* 天空雲朵 */
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.9;
+        }
+        .cloud-1 { width: 80px; height: 30px; top: 30px; left: 100px; animation: float 8s ease-in-out infinite; }
+        .cloud-2 { width: 60px; height: 25px; top: 60px; left: 400px; animation: float 10s ease-in-out infinite 1s; }
+        .cloud-3 { width: 100px; height: 35px; top: 20px; left: 700px; animation: float 12s ease-in-out infinite 2s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(20px); }
+        }
+
+        /* 辦公室建築 */
+        .building {
+            position: absolute;
+            bottom: 80px;
+            width: 860px;
+            height: 280px;
+            left: 20px;
+            background: linear-gradient(to bottom, #8b7355 0%, #6b5344 100%);
+            border: 4px solid #4a3728;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /* 窗戶 */
+        .window-row {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 30px;
+        }
+
+        .window {
+            width: 100px;
+            height: 70px;
+            background: linear-gradient(to bottom, #4a90a4, #357a8a);
+            border: 3px solid #3d2817;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .window::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #3d2817;
+        }
+
+        .window::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 3px;
+            background: #3d2817;
+        }
+
+        /* 工作站 */
+        .workstation {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 20px;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+        }
+
+        .desk {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 電腦螢幕 */
+        .monitor {
+            width: 60px;
+            height: 45px;
+            background: #1a1a2e;
+            border: 3px solid #3d2817;
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #00ff00;
+            padding: 2px;
+        }
+
+        /* 螢幕狀態動畫 */
+        .monitor.idle .screen-content { color: #00ff00; }
+        .monitor.typing .screen-content { 
+            color: #00ff00;
+            animation: blink 0.5s infinite;
+        }
+        .monitor.thinking .screen-content { color: #ffff00; }
+        .monitor.chat .screen-content { color: #ff6b6b; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .desk-stand {
+            width: 8px;
+            height: 15px;
+            background: #3d2817;
+        }
+
+        .desk-top {
+            width: 80px;
+            height: 8px;
+            background: #5a4a3a;
+            border: 2px solid #3d2817;
+            margin-top: -2px;
+        }
+
+        /* 鍵盤 */
+        .keyboard {
+            width: 40px;
+            height: 12px;
+            background: #2d2d44;
+            border: 2px solid #1a1a2e;
+            margin-top: 3px;
+            border-radius: 2px;
+        }
+
+        /* 椅子 */
+        .chair {
+            width: 30px;
+            height: 20px;
+            background: #e74c3c;
+            border-radius: 0 0 5px 5px;
+            position: relative;
+            margin-top: 2px;
+        }
+
+        .chair-back {
+            width: 30px;
+            height: 25px;
+            background: #c0392b;
+            border-radius: 5px 5px 0 0;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+        }
+
+        /* 角色 */
+        .character {
+            position: absolute;
+            bottom: 95px;
+            width: 32px;
+            height: 48px;
+            animation: idle 1s infinite;
+        }
+
+        @keyframes idle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+
+        .char-head {
+            width: 20px;
+            height: 20px;
+            background: #ffd5b5;
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .char-hair {
+            position: absolute;
+            top: -5px;
+            left: 2px;
+            width: 16px;
+            height: 12px;
+            border-radius: 50% 50% 0 0;
+        }
+
+        .char-body {
+            width: 24px;
+            height: 20px;
+            margin: 2px auto 0;
+            border-radius: 5px;
+        }
+
+        .char-legs {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .char-leg {
+            width: 8px;
+            height: 12px;
+            background: #2c3e50;
+            border-radius: 0 0 3px 3px;
+        }
+
+        /* 各角色位置 */
+        .char-frontend { left: 70px; }
+        .char-backend { left: 180px; }
+        .char-data { left: 290px; }
+        .char-devops { left: 400px; }
+        .char-qa { left: 510px; }
+        .char-ai { left: 620px; }
+        .char-secops { left: 730px; }
+
+        /* 角色顏色 */
+        .role-frontend .char-hair { background: #e74c3c; }
+        .role-frontend .char-body { background: #3498db; }
+
+        .role-backend .char-hair { background: #27ae60; }
+        .role-backend .char-body { background: #27ae60; }
+
+        .role-data .char-hair { background: #9b59b6; }
+        .role-data .char-body { background: #9b59b6; }
+
+        .role-devops .char-hair { background: #f39c12; }
+        .role-devops .char-body { background: #f39c12; }
+
+        .role-qa .char-hair { background: #1abc9c; }
+        .role-qa .char-body { background: #1abc9c; }
+
+        .role-ai .char-hair { background: #e91e63; }
+        .role-ai .char-body { background: #e91e63; }
+
+        .role-secops .char-hair { background: #607d8b; }
+        .role-secops .char-body { background: #607d8b; }
+
+        /* 角色狀態標籤 */
+        .status-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            white-space: nowrap;
+        }
+
+        /* 狀態指示燈 */
+        .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+        .status-dot.online { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
+        .status-dot.busy { background: #e74c3c; box-shadow: 0 0 5px #e74c3c; animation: pulse 1s infinite; }
+        .status-dot.away { background: #f39c12; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 會議室 */
+        .meeting-room {
+            position: absolute;
+            right: 20px;
+            bottom: 380px;
+            width: 180px;
+            height: 120px;
+            background: linear-gradient(to bottom, #5a4a3a, #4a3a2a);
+            border: 4px solid #3d2817;
+            border-radius: 8px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            z-index: 100;
+        }
+
+        .meeting-room.active {
+            display: flex;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(200px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .meeting-title {
+            color: #ffd93d;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .meeting-participants {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .meeting-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid #ffd93d;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .meeting-topic {
+            color: #fff;
+            font-size: 10px;
+            margin-top: 8px;
+            text-align: center;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* 會議室按鈕 */
+        .meeting-btn {
+            position: absolute;
+            right: 20px;
+            bottom: 280px;
+            background: #e74c3c;
+            color: white;
+            border: 3px solid #c0392b;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .meeting-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        /* 底部狀態列 */
+        .status-bar {
+            width: 900px;
+            background: #2d2d44;
+            border: 4px solid #1a1a2e;
+            border-radius: 4px;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .team-status {
+            display: flex;
+            gap: 15px;
+        }
+
+        .team-member {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #ccc;
+            font-size: 11px;
+        }
+
+        .member-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        .time-display {
+            color: #ffd93d;
+            font-size: 14px;
+        }
+
+        /* 特效：聊天泡泡 */
+        .chat-bubble {
+            position: absolute;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            opacity: 0;
+            animation: popIn 0.3s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🍁 虛擬辦公室</h1>
+    <p class="subtitle">MapleStory 風格 | 點擊角色切換狀態</p>
+    
+    <div class="office-container" id="office">
+        <!-- 雲朵 -->
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+        
+        <!-- 建築 -->
+        <div class="building">
+            <!-- 窗戶裝飾 -->
+            <div class="window-row">
+                <div class="window"></div>
+                <div class="window"></div>
+                <div class="window"></div>
+                <div class="window"></div>
+                <div class="window"></div>
+                <div class="window"></div>
+            </div>
+            
+            <!-- 工作站 -->
+            <div class="workstation">
+                <!-- Frontend -->
+                <div class="desk" id="desk-frontend">
+                    <div class="monitor idle">
+                        <div class="screen-content">Frontend<br>Idle...</div>
+                    </div>
+                    <div class="keyboard"></div>
+                    <div class="desk-stand"></div>
+                    <div class="desk-top"></div>
+                    <div class="chair-back"></div>
+                    <div class="chair"></div>
+                </div>
+                
+                <!-- Backend -->
+                <div class="desk" id="desk-backend">
+                    <div class="monitor typing">
+                        <div class="screen-content">Backend<br> coding_</div>
+                    </div>
+                    <div class="keyboard"></div>
+                    <div class="desk-stand"></div>
+                    <div class="desk-top"></div>
+                    <div class="chair-back"></div>
+                    <div class="chair"></div>
+                </div>
+                
+                <!-- Data -->
+                <div class="desk" id="desk-data">
+                    <div class="monitor thinking">
+                        <div class="screen-content">Data<br>Analyzing</div>
+                    </div>
+                    <div class="keyboard"></div>
+                    <div class="desk-stand"></div>
+                    <div class="desk-top"></div>
+                    <div class="chair-back"></div>
+                    <div class="chair"></div>
+                </div>
+                
+                <!-- Devops -->
+                <div class="desk" id="desk-devops">
+                    <div class="monitor idle">
+                        <div class="screen-content">DevOps<br>CI/CD OK</div>
+                    </div>
+                    <div class="keyboard"></div>
+                    <div class="desk-stand"></div>
+                    <div class="desk-top"></div>
+                    <div class="chair-back"></div>
+                    <div class="chair"></div>
+                </div>
+                
+                <!-- QA -->
+                <div class="desk" id="desk-qa">
+                    <div class="monitor chat">
+                        <div class="screen-content">QA<br>Testing_</div>
+                    </div>
+                    <div class="keyboard"></div>
+                    <div class="desk-stand"></div>
+                    <div class="desk-top"></div>
+                    <div class="chair-back"></div>
+                    <div class="chair"></div>
+                </div>
+                
+                <!-- AI Engineer -->
+                <div class="desk" id="desk-ai">
+                    <div class="monitor thinking">
+                        <div class="screen-content">AI Eng<br>Training</div>
+                    </div>
+                    <div class="keyboard"></div>
+                    <div class="desk-stand"></div>
+                    <div class="desk-top"></div>
+                    <div class="chair-back"></div>
+                    <div class="chair"></div>
+                </div>
+                
+                <!-- SecOps -->
+                <div class="desk" id="desk-secops">
+                    <div class="monitor idle">
+                        <div class="screen-content">SecOps<br>Monitoring</div>
+                    </div>
+                    <div class="keyboard"></div>
+                    <div class="desk-stand"></div>
+                    <div class="desk-top"></div>
+                    <div class="chair-back"></div>
+                    <div class="chair"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 角色 -->
+        <div class="character char-frontend role-frontend" onclick="toggleStatus('frontend')">
+            <div class="char-head">
+                <div class="char-hair"></div>
+            </div>
+            <div class="char-body"></div>
+            <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+            </div>
+            <div class="status-label">
+                <span class="status-dot online"></span>Frontend
+            </div>
+        </div>
+        
+        <div class="character char-backend role-backend" onclick="toggleStatus('backend')">
+            <div class="char-head">
+                <div class="char-hair"></div>
+            </div>
+            <div class="char-body"></div>
+            <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+            </div>
+            <div class="status-label">
+                <span class="status-dot busy"></span>Backend
+            </div>
+        </div>
+        
+        <div class="character char-data role-data" onclick="toggleStatus('data')">
+            <div class="char-head">
+                <div class="char-hair"></div>
+            </div>
+            <div class="char-body"></div>
+            <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+            </div>
+            <div class="status-label">
+                <span class="status-dot online"></span>Data
+            </div>
+        </div>
+        
+        <div class="character char-devops role-devops" onclick="toggleStatus('devops')">
+            <div class="char-head">
+                <div class="char-hair"></div>
+            </div>
+            <div class="char-body"></div>
+            <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+            </div>
+            <div class="status-label">
+                <span class="status-dot online"></span>DevOps
+            </div>
+        </div>
+        
+        <div class="character char-qa role-qa" onclick="toggleStatus('qa')">
+            <div class="char-head">
+                <div class="char-hair"></div>
+            </div>
+            <div class="char-body"></div>
+            <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+            </div>
+            <div class="status-label">
+                <span class="status-dot busy"></span>QA
+            </div>
+        </div>
+        
+        <div class="character char-ai role-ai" onclick="toggleStatus('ai')">
+            <div class="char-head">
+                <div class="char-hair"></div>
+            </div>
+            <div class="char-body"></div>
+            <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+            </div>
+            <div class="status-label">
+                <span class="status-dot online"></span>AI Eng
+            </div>
+        </div>
+        
+        <div class="character char-secops role-secops" onclick="toggleStatus('secops')">
+            <div class="char-head">
+                <div class="char-hair"></div>
+            </div>
+            <div class="char-body"></div>
+            <div class="char-legs">
+                <div class="char-leg"></div>
+                <div class="char-leg"></div>
+            </div>
+            <div class="status-label">
+                <span class="status-dot online"></span>SecOps
+            </div>
+        </div>
+    </div>
+    
+    <!-- 狀態列 -->
+    <!-- 會議室按鈕 -->
+    <button class="meeting-btn" onclick="toggleMeeting()">
+        📞 召開會議
+    </button>
+
+    <!-- 會議室 -->
+    <div class="meeting-room" id="meetingRoom">
+        <div class="meeting-title">🍁 會議室 - 頻道 1484773969478549689</div>
+        <div class="meeting-participants" id="meetingParticipants">
+            <!-- 動態生成 -->
+        </div>
+        <div class="meeting-topic" id="meetingTopic">休閒聊天</div>
+    </div>
+
+    <div class="status-bar">
+        <div class="team-status">
+            <div class="team-member">
+                <div class="member-avatar" style="background:#e74c3c;">F</div>
+                <span class="status-dot online"></span>Frontend
+            </div>
+            <div class="team-member">
+                <div class="member-avatar" style="background:#27ae60;">B</div>
+                <span class="status-dot busy"></span>Backend
+            </div>
+            <div class="team-member">
+                <div class="member-avatar" style="background:#9b59b6;">D</div>
+                <span class="status-dot online"></span>Data
+            </div>
+            <div class="team-member">
+                <div class="member-avatar" style="background:#f39c12;">D</div>
+                <span class="status-dot online"></span>DevOps
+            </div>
+            <div class="team-member">
+                <div class="member-avatar" style="background:#1abc9c;">Q</div>
+                <span class="status-dot busy"></span>QA
+            </div>
+            <div class="team-member">
+                <div class="member-avatar" style="background:#e91e63;">A</div>
+                <span class="status-dot online"></span>AI
+            </div>
+            <div class="team-member">
+                <div class="member-avatar" style="background:#607d8b;">S</div>
+                <span class="status-dot online"></span>SecOps
+            </div>
+        </div>
+        <div class="time-display" id="clock">00:00:00</div>
+    </div>
+
+    <script>
+        // 時鐘
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('zh-TW', { hour12: false });
+            document.getElementById('clock').textContent = time;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 點擊切換狀態
+        const states = ['idle', 'typing', 'thinking', 'chat'];
+        const stateTexts = {
+            'idle': 'Idle...',
+            'typing': 'coding_',
+            'thinking': 'Analyzing',
+            'chat': 'Chatting'
+        };
+        const stateIndex = {};
+        
+        function toggleStatus(role) {
+            if (stateIndex[role] === undefined) stateIndex[role] = 0;
+            stateIndex[role] = (stateIndex[role] + 1) % states.length;
+            const newState = states[stateIndex[role]];
+            
+            const monitor = document.querySelector(`#desk-${role} .monitor`);
+            monitor.className = `monitor ${newState}`;
+            monitor.querySelector('.screen-content').innerHTML = `${role.toUpperCase()}<br>${stateTexts[newState]}`;
+            
+            // 更新狀態燈
+            const char = document.querySelector(`.char-${role}`);
+            const dot = char.querySelector('.status-dot');
+            dot.className = 'status-dot';
+            if (newState === 'typing' || newState === 'chat') {
+                dot.classList.add('busy');
+            } else if (newState === 'thinking') {
+                dot.classList.add('away');
+            } else {
+                dot.classList.add('online');
+            }
+        }
+    </script>
+</body>
+</html>
